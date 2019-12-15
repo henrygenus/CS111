@@ -1,0 +1,185 @@
+#!/bin/bash
+
+# IF YOU WOULD LIKE ERROR MESSAGES, REMOVE COMMENTS FROM TESTS
+
+
+ERR=0
+MAKEFLAG=0
+EXECUTABLE='lab0'
+function CLEANRESULT {
+rm result.txt
+touch result.txt
+}
+
+if ! [ -f '$EXECUTABLE' ]; then
+    make -f "Makefile" &> /dev/null
+    MAKEFLAG=1
+fi
+
+#############################
+###########TESTS#############
+#############################
+echo "Running test cases..."
+
+STR='word'
+echo $STR > text.txt
+touch result.txt
+
+echo "*Checking segfault..."
+{ ./lab0 --segfault; } #&>result.txt
+if [[ $? -ne 139 ]]; then
+    let ERR+=1
+    echo "FAIL"
+else
+    echo "PASS"
+fi
+
+
+echo "*Checking catch..."
+$(CLEANRESULT)
+{ ./lab0 --segfault --catch; } #&>result.txt
+if [[ $? -ne 4 ]]; then
+    let ERR+=1
+    echo "FAIL"
+else
+    echo "PASS"
+fi
+
+echo "*Checking drop-core..."
+$(CLEANRESULT)
+{ ./lab0 --segfault --catch --dump-core; } #&>result.txt
+if [[ $? -ne 139 ]]; then
+    let ERR+=1
+    echo "FAIL"
+else
+    echo "PASS"
+fi
+
+echo "*Checking catch/drop-core cancel..."
+$(CLEANRESULT)
+{ ./lab0 --catch --dump-core --segfault --catch; } #&>result.txt
+if [[ $? -ne 4 ]]; then
+    let ERR+=1
+    echo "FAIL"
+else
+    echo "PASS"
+fi
+
+echo "*Checking no input..."
+$(CLEANRESULT)
+./lab0 --input= #&>result.txt
+if [[ $? -ne 2 ]]; then
+    let ERR+=1
+    echo "FAIL"
+else
+    echo "PASS"
+fi
+
+echo "*Checking no output..."
+$(CLEANRESULT)
+./lab0 --output= #&>result.txt
+if [[ $? -ne 3 ]]; then
+    let ERR+=1
+    echo "FAIL"
+else
+    echo "PASS"
+fi
+echo "*Checking bad input..."
+touch badfile
+chmod -r badfile
+$(CLEANRESULT)
+./lab0 --input=badfile #&>result.txt
+if [[ $? -ne 2 ]]; then
+    let ERR+=1
+    echo "FAIL"
+else
+    echo "PASS"
+fi
+
+echo "*Checking bad output..."
+chmod -w badfile
+$(CLEANRESULT)
+./lab0 --output=badfile #&>result.txt
+if [[ $? -ne 3 ]]; then
+    let ERR+=1
+    echo "FAIL"
+else
+    echo "PASS"
+fi
+
+echo "*Checking bad option..."
+$(CLEANRESULT)
+./lab0 --badoption #&>result.txt
+if [[ $? -ne  1 ]]; then
+    let ERR+=1
+    echo "FAIL"
+else
+    echo "PASS"
+fi
+
+echo "*Checking stdin..."
+$(CLEANRESULT)
+echo $STR | ./lab0 &>result.txt
+if [[ $? -ne 0 ]] || [ $(cat result.txt) != $STR ]; then
+    let ERR+=1
+    echo "FAIL"
+else
+    echo "PASS"
+fi
+
+echo "*Checking file input..."
+OUTPUT=$(./lab0 --input=text.txt)
+if [[ $? -ne 0 ]] || ! [[ $OUTPUT == $STR ]]; then
+    let ERR+=1
+    echo "FAIL"
+else
+    echo "PASS"
+fi
+
+echo "*Checking file output with file creation..."
+rm result.txt
+echo $STR | ./lab0 --output=result.txt
+if [[ $? -ne 0 ]] || [ $(cat result.txt) != $STR ]; then
+    let ERR+=1
+    echo "FAIL"
+else
+    echo "PASS"
+fi
+
+echo "*Checking file output without file creation..."
+$(CLEANRESULT)
+echo $STR | ./lab0 --output=result.txt
+if [[ $? -ne 0 ]] || [ $(cat result.txt) != $STR ]; then
+    let ERR+=1
+    echo "FAIL"
+else
+    echo "PASS"
+fi
+
+echo "*Checking file input & output..."
+$(CLEANRESULT)
+./lab0 --input=text.txt --output=result.txt
+if [[ $? -ne 0 ]] || [ $(cat result.txt) != $STR ]; then
+    let ERR+=1
+    echo "FAIL"
+else
+    echo "PASS"
+fi
+
+
+#############################
+############EXIT#############
+#############################
+
+if [[ $ERR -eq 0 ]]; then
+    echo "*** All Tests passed! ***"
+else
+    echo "*** Script failed with "$ERR" errors. ***"
+fi
+
+if [[ $MAKEFLAG -eq 1 ]]; then
+    rm lab0
+fi
+
+rm -f text.txt badfile result.txt
+echo $ERR > /dev/null

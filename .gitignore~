@@ -1,0 +1,15 @@
+.gitignore
+.DS_store
+lab0/
+lab2/
+lab3/
+lab4/
+.idea/
+.simpsh.c.swp
+SK_Textbook.pdf
+
+lab1/"CS111 Labs"
+lab1/PDFS
+lab1/final.pdf
+lab1/"REGEX Cheat Sheet.pdf"
+lab1/midterm.pdf

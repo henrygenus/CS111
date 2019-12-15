@@ -1,0 +1,42 @@
+NAME: Henry Genus
+EMAIL: hgenus@g.ucla.edu
+ID: 304965058
+
+This assignment is a relatively trivial one designed to get students familiar with SEASNET.
+It includes a few of the concepts relevant to the next lab.
+
+PACKAGE CONTENTS:
+lab0.c: the source code for the lab
+Makefile: the building and compiling instructions
+backtrace.png: an image of a segfault and associated stack-trace
+breakpoint.png: a breakpoint and associated stack trace
+test: an executable test script called by 'make clean'
+      contains the following tests:
+      	       "$ ./lab0 --segfault" 
+	       	  	 //to ensure segfault is exiting correctly
+	       "$ ./lab0 --segfault --catch" 
+	       	     	 //to ensure we are catching the fault
+	       "$ ./lab0 --segfault --catch --dump-core" 
+	       	     	 //to ensure we dump-core catches catch
+	       "$ ./lab0 --catch --dump-core --segfault --catch" 
+	       	     	 //to ensure the cancel still allows another
+	       "$ ./lab0 --input= "
+	       	     	 //to ensure we are catching empty input files
+	       "$ ./lab0 --output= "
+	       	     	 //to ensure we are catching empty output files
+	       "$ ./lab0 --input=badfile"
+	       	  	 // to ensure we throw a correct error on a file w/ no read permission
+	       "$ ./lab0 --output=badfile"
+	       	  	 // to ensure we throw a correct error on a file w/ no write permission
+	       "$ ./lab0 --badoption"
+	       	  	 // to make sure we throw the correct error on an invalid option
+	       "$ echo $STR | ./lab0"
+	       	       	 // to make sure we can handle stdin
+	       "$ ./lab0 --input=text.txt"
+	       	  	 // to make sure we can handle file inputs
+	       "$ echo $STR | ./lab0 --output=result.txt"
+	       	         // to make sure we can handle file outputs
+	       "$ echo $STR | ./lab0 --output=result.txt"
+	       	         // to make sure we can handle existant file outputs
+	       "$ ./lab0 --input=text.txt --output=result.txt"
+	       	  	 // to make sure we can handle file in and outputs together
