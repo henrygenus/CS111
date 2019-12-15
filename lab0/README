@@ -25,11 +25,11 @@ test: an executable test script called by 'make clean'
 	       "$ ./lab0 --output= "
 	       	     	 //to ensure we are catching empty output files
 	       "$ ./lab0 --input=badfile"
-	       	  	 // to ensure we throw a correct error on a file w/ no read permission
+	       	  	 // throw a correct error on a file w/ no read permission
 	       "$ ./lab0 --output=badfile"
-	       	  	 // to ensure we throw a correct error on a file w/ no write permission
+	       	  	 // throw a correct error on a file w/ no write permission
 	       "$ ./lab0 --badoption"
-	       	  	 // to make sure we throw the correct error on an invalid option
+	       	  	 // throw the correct error on an invalid option
 	       "$ echo $STR | ./lab0"
 	       	       	 // to make sure we can handle stdin
 	       "$ ./lab0 --input=text.txt"
