@@ -38,6 +38,8 @@ struct thread_info { pid_t pid; int start_index; int end_index; int profile;};
 void sig_handler(int sig);
 // prints error message.  set opstr = "" for int error.
 static inline void opt_error(int optint, const char* optstr, int* failed_opt); 
+// converts a string of integers into the relevant sum (atoi + error checking)
+static inline int string_to_int(char* string);
 // output completed thread info
 // prints option & corresponding argument(s) up to option w/ --
 static inline void print_command(int start_index, int end_index, char** argv);
@@ -45,8 +47,6 @@ static inline void print_option(int option_index, struct option* longopts, char*
 static inline void print_data(const char* command,
 			      struct timeval ru_utime, struct timeval utime, 
 			      struct timeval ru_stime, struct timeval stime);
-// converts a string of integers into the relevant sum
-static inline int string_to_int(char* string);
 
 int main(int argc, char** argv) {
   int longindex = 1, noptind, num_fd = 0, pipefd[2], fds[1024] = { [0 ... 1023 ] = -1 }; 
@@ -93,7 +93,7 @@ int main(int argc, char** argv) {
     { .name = 0,            .has_arg = 0,                  .flag = 0,     .val = 0           }
   };
 
-  opterr = 0;
+
   while (1) {
     if ((option = getopt_long(argc, argv, "", longopts, &longindex)) == -1)
       break;
@@ -369,22 +369,20 @@ static inline void print_option(int opt_index, struct option* longopts, char** a
   int start, end, ctr, flag=0;
 
   // determine command start index in argv
-  for (start =  opt_index-1; (start > 0); start--) {
+  for (start =  opt_index-1; start > 0; start--) {
+    if (argv[start][0] != '-') { flag = 1; break; }
     for (ctr = 0; ctr < NUM_OPTS; ctr++)
-      if (argv[start][0] != '-' || strcmp(longopts[ctr].name, argv[start]+2) == 0)
-        { flag = 1; break; }
+      if (strcmp(longopts[ctr].name, argv[start]+2) == 0) { flag = 1; break; }
     if (flag) { start++; break; }
   }
 
   // determine command end index in argv
   for (end = opt_index+1; end < argc; end++)
-    if (argv[end][0] == '-' && argv[end][1] == '-')
-      break;
+    if (argv[end][0] == '-' && argv[end][1] == '-') break;
 
   // print
-  ctr = start;
-  while (ctr < end)
-    fprintf(stdout, "%s ", argv[ctr++]);
+  ctr = ++start;
+  while (ctr < end) fprintf(stdout, "%s ", argv[ctr++]);
   fprintf(stdout, "\n");
   fflush(NULL);
 }
@@ -392,7 +390,7 @@ static inline void print_option(int opt_index, struct option* longopts, char** a
 static inline void opt_error(int optint, const char* optstr, int* failed_opt)
 {
   if (strcmp(optstr, COMMAND_KEYWORD) == 0)
-    fprintf(stderr, "Missing argument for %s\n", COMMAND_KEYWORD);
+
   else if (strcmp(optstr, "") ==0)
     fprintf(stderr, "%s: %i\n", strerror(errno), optint);
   else
