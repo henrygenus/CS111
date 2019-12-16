@@ -21,6 +21,7 @@ int main(int argc, char** argv) {
   char test[MAX_TEST_LENGTH] = "add", lock_type[6] = "-none";
   struct timespec* start_time = &(struct timespec){0,0};
   struct timespec* end_time = &(struct timespec){0,0};
+  struct add_info structure;
   long long counter = 0; long time;
   pthread_t* threads; 
   pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER; 
@@ -28,8 +29,7 @@ int main(int argc, char** argv) {
 
   // get thread and iteration number
   while(1) {
-    if ((opt = getopt_long(argc, argv, "", longopts, &longindex)) == -1)
-      break;
+    if ((opt = getopt_long(argc, argv, "", longopts, &longindex)) == -1) break;
     switch(opt) {
     case THREADS:
       nthreads = (optarg == NULL ? 1 : string_to_int(optarg));
@@ -43,11 +43,9 @@ int main(int argc, char** argv) {
     case SYNC:
       if (strcmp(optarg, "m") == 0) lock_union.mlock = &lock;
       else if (strcmp(optarg, "s") == 0) lock_union.slock = &spin_lock;
-      else if (strcmp(optarg, "c") == 0) {;}
-      else {
-	error_string("Bad sync parameter", optarg, 1);
-      }
-      strcpy(lock_type, "-"); strcat(lock_type, optarg);        
+      else if (strcmp(optarg, "c") == 0);
+      else error_string("Bad sync parameter", optarg, 1);
+      strcpy(lock_type, "-"); strcat(lock_type, optarg);
       break;
     default:
       exit(1);
@@ -55,33 +53,29 @@ int main(int argc, char** argv) {
     }
   }
   // check thread and iteration numbers
-  if (nthreads <= 0)
-    error_int("Invalid Thread Number", nthreads, 1);
-  else if (niterations < 0)
-    error_int("Invalid Iteration Number", niterations, 1);
+  if (nthreads <= 0) error_int("Invalid Thread Number", nthreads, 1);
+  else if (niterations < 0) error_int("Invalid Iteration Number", niterations, 1);
 
   // get test string and lock ready
   if (opt_yield) strcat(test, "-yield");
   strcat(test, lock_type);
 
   //get pre-action time
-  if(clock_gettime(CLOCK_REALTIME, start_time) == -1)
-    error_string(strerror(errno), "pre-operation time", 1);
+  if(clock_gettime(CLOCK_REALTIME, start_time) == -1) exit(SYS_ERROR);
 
   //create threads
   threads = (pthread_t*)malloc(nthreads*sizeof(pthread_t));
-  for(ctr=0; ctr < nthreads; ctr++) 
-    pthread_create(&threads[ctr], NULL, thread_action, 
-		   &(struct add_info){&counter, niterations, lock_type[1], lock_union});
-
+  for(ctr=0; ctr < nthreads; ctr++) {
+    structure = (struct add_info){&counter, niterations, lock_type[1], lock_union};
+    if (pthread_create(&threads[ctr], NULL, thread_action, &structure)) exit(SYS_ERROR);
+  }
+  
   // collect threads
   for(ctr=0; ctr < nthreads; ctr++) 
-    if(pthread_join(threads[ctr], NULL))
-      error_int(strerror(errno), threads[ctr], 2);
+    if(pthread_join(threads[ctr], NULL)) exit(SYS_ERROR);
 
   // get accumulated time
-  if(clock_gettime(CLOCK_REALTIME, end_time) == -1)
-    error_string(strerror(errno), "post-operation time", 2);
+  if(clock_gettime(CLOCK_REALTIME, end_time) == -1) exit(SYS_ERROR);
   time = (end_time->tv_sec - start_time->tv_sec)*1000000000
     + (end_time->tv_nsec - start_time->tv_nsec);
   noperations = nthreads*niterations*2;
@@ -89,8 +83,7 @@ int main(int argc, char** argv) {
   // output and exit
   fprintf(stdout, "%s,%i,%i,%i,%li,%li,%lli\n", test,
 	  nthreads, niterations, noperations, time, time/(long)noperations, counter);
-  if(threads != NULL)
-    free(threads);
+  if(threads != NULL) free(threads);
   exit(ret);
 }
 
@@ -102,8 +95,7 @@ int main(int argc, char** argv) {
 
 void add(long long *pointer, long long value) {
   long long sum = *pointer + value;
-  if (opt_yield)
-    sched_yield();
+  if (opt_yield) sched_yield();
   *pointer = sum;
 }
 
@@ -112,12 +104,11 @@ void atomic_add(long long* pointer, long long value) {
   do {
     prev = *pointer;
     sum = prev + value;
-    if (opt_yield)
-      sched_yield();
+    if (opt_yield) sched_yield();
   } while(__sync_val_compare_and_swap(pointer, prev, sum) != prev);
 }
 
-void* thread_action(void *pointer) {
+void *thread_action(void *pointer) {
   int ctr;
   struct add_info* p = (struct add_info*)pointer;
   void (*fcn)(long long *pointer, long long value) = (p->lock_type == 'c') ? &atomic_add : &add;
