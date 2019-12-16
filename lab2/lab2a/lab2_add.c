@@ -130,12 +130,12 @@ void* thread_action(void *pointer) {
   return NULL;
 }
 
-inline void lock(lock_info *lock, char lock_type) {
+void lock(lock_info *lock, char lock_type) {
   if (lock_type == 'm') pthread_mutex_lock(lock->mlock);
   else if (lock_type == 's') while (__sync_lock_test_and_set(lock->slock, 1)) ;
 }
 
-inline void unlock(lock_info *lock, char lock_type) {
+void unlock(lock_info *lock, char lock_type) {
   if (lock_type == 'm') pthread_mutex_unlock(lock->mlock);
   else if (lock_type == 's') __sync_lock_release(lock->slock);
 }
