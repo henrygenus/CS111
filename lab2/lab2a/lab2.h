@@ -13,7 +13,7 @@
 #define ITERATIONS 'b'
 #define YIELD 'c'
 #define SYNC 'd'
-
+#define SYS_ERROR system_call_error()
 #define MAX_LENGTH 10
 #define MIN_LENGTH 3
 int opt_yield;
@@ -41,6 +41,12 @@ struct add_info
   char lock_type; 
   lock_info lock; 
 };
+
+// error message for system calls
+static inline _Noreturn system_call_error() {
+  perror(NULL);
+  exit(1);
+}
 
 // error message for when parameter is integer      
 static inline void error_int(const char* message, int argument, int code) {
