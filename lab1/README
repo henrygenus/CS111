@@ -1,7 +1,14 @@
 NAME: Henry Genus
-EMAIL: henry.a.genus@ucla.edu
+EMAIL: henry.a.genus@gmail.com
 ID: 304965058
- 
+
+The crux of the assignment was to design a SIMPle SHell to imitate BASH commands.
+
+Files:
+spec.pdf		a pdf copy of the spec for the assignment
+simpsh.c		the c source code for the assignment
+test.sh			a script designed to run test cases on the program
+report.pdf		a report comparing our shell to bash and dash
 
 $(make check) runs the following tests:
 
