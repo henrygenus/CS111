@@ -1,0 +1,17 @@
+NAME: Henry Genus
+EMAIL: hgenus@g.ucla.edu
+ID: 304965058
+
+BeagleBone serial number: 102010148
+My connection was via LAN cable
+
+my_beaglebone.jpg: 	a screenshot of me holding your assembled Beaglebone
+connected.png: 		from a USB terminal command session showing the 
+			BeagleBone's name and configured network access.
+copy.png: 		a screenshot from a local session in which I copied 
+			a hello world program to the Beaglebone.
+build_run.png: 		a screenshot from a WIFI SSH session in which I built
+			and run a trivial (hello world) program.
+git.png: 		a screenshot from a WIFI SSH session in which I 
+			installed git and cloned a repository.
+
