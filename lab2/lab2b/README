@@ -21,7 +21,8 @@ lab2b_2.png: 	mean time per mutex wait and mean time per operation for
 		mutex-synchronized list operations
 lab2b_3.png: 	successful iterations vs. threads for each synchronization method
 lab2b_4.png: 	throughput vs. thread count for mutex synchronized partitioned lists
-lab2b_5.png: 	throughput vs. thread count for spin-lock-synchronized partitioned lists
+lab2b_5.png: 	throughput vs. thread count for spin-lock-synchronized partitioned
+		lists
 lab2b_list.gp: 	a script which creates the above five graphs from lab2b_list.csv
 run_tests: 	a script which implements the tests as required for the graphs
 
