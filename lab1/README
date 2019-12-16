@@ -21,8 +21,9 @@ $(make check) runs the following tests:
     --profile \
     --time 
 
-This is the most straightforward test; it is interesting because each command depends on the \
-     previous one operating correctly, so the pipes are tested as well.
+This is the most straightforward test; it is interesting because each
+command depends on the previous one operating correctly, so the pipes
+are tested as well.
 
 2.
 ./simpsh \
@@ -40,8 +41,9 @@ This is the most straightforward test; it is interesting because each command de
     --profile \
     --time 
 
-This test makes sure that the order of the commands does not matter, as they are run in parallel, \
-     but the instruction lists sort, which uses the output of cat, as before cat.
+This test makes sure that the order of the commands does not matter,
+as they are run in parallel, but the instruction lists sort, which
+uses the output of cat, as before cat.
 
 3.
 ./simpsh --rdonly in.txt \
