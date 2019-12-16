@@ -18,7 +18,6 @@ int main(int argc, char** argv) {
 
     // initialize devices
     if(initialize_sensors(&device) == -1) exit(2);
-    
        
     // loop to print, get commands, check button
     while(flags.run_flag) {

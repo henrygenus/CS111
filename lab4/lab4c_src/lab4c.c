@@ -115,8 +115,7 @@ int do_write(port *port, char *string, int size) {
 bool last_entry(pid_t device, char *buffer) {
     int ctr = 0;
     while (buffer[ctr] != ' ') ctr++;
-    return (device ? subcmp(&buffer[++ctr], "SHUTDOWN\n", 9)
-            : subcmp(buffer, "OFF\n", 4));
+    return (device ? subcmp(&buffer[++ctr], "SHUTDOWN\n", 9) : subcmp(buffer, "OFF\n", 4));
 }
 
 SSL_CTX *ssl_init(void) {

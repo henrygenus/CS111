@@ -4,10 +4,10 @@
 #include "../constants.h"
 #include <time.h>
 
-// #include "debug.h"
+#include "debug.h"
 
-#include <mraa/gpio.h>
-#include <mraa/aio.h>
+//#include <mraa/gpio.h>
+//#include <mraa/aio.h>
 
 // struct to allow flags to be passed neatly
 typedef struct flag_struct {
