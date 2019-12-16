@@ -1,0 +1,14 @@
+#!/bin/bash 
+
+
+for arg in "" "--yield"; do
+    for lock in "" "--sync=m" "--sync=s" "--sync=c"; do
+	for iterations in 10 20 40 80 100 1000 10000 100000; do
+	    for threads in 1 2 4 8 12; do	
+		    ./lab2_add --iterations=$iterations --threads=$threads $arg $lock
+	    done
+	done
+    done
+done
+
+echo 0 > /dev/null

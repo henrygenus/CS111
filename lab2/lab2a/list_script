@@ -1,0 +1,35 @@
+#!/bin/bash 
+
+declare -a YIELDS=("" "--yield=i" "--yield=d" "--yield=dl" "--yield=il" "--yield=idl")
+
+for iterations in 10 100 1000 10000 20000; do
+    ./lab2_list --iterations=$iterations
+done
+
+for threads in 2 4 8 12; do
+    for iterations in 1 10 100 1000; do
+	./lab2_list --iterations=$iterations --threads=$threads #2> /dev/null
+    done
+done
+
+for threads in 2 4 8 12; do
+    for iterations in 1 2 4 8 16 32;do
+	for arg in "${YIELDS[@]}"; do
+	    ./lab2_list --threads=$threads --iterations=$iterations $arg #2> /dev/null
+	done
+    done
+done
+
+for arg in "${YIELDS[@]}"; do
+    for sync in "--sync=s" "--sync=m"; do
+	./lab2_list --threads=12 --iterations=32 $arg $sync
+    done
+done
+
+for threads in 1 2 4 8 12 16 24; do
+    for sync in "--sync=s" "--sync=m"; do
+	    ./lab2_list --threads=$threads --iterations=1000 $sync
+    done
+done
+
+echo 0 > /dev/null

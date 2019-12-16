@@ -1,0 +1,25 @@
+#!/bin/bash 
+
+for lock in "m" "s"; do
+    for threads in 1 2 4 8 12 16 24; do
+	for lists in 1 4 8 16; do
+	    ./lab2_list --iterations=1000 --threads=$threads --sync=$lock --lists=$lists
+	done
+    done
+done
+
+for lock in "none" "--sync=m" "--sync=s"; do
+    for threads in 1 4 8 12 16; do
+	if [ $lock == "none" ]; then
+	    for iterations in 1 2 4 8 16; do
+		./lab2_list --iterations=$iterations --threads=$threads --yield=id --lists=4
+	    done
+	else
+	    for iterations in 10 20 40 80; do
+		./lab2_list --iterations=$iterations --threads=$threads $lock --yield=id --lists=4
+	    done
+	fi
+    done
+done
+
+echo 0 > /dev/null

@@ -1,0 +1,149 @@
+Total: 166 samples
+      60  36.1%  36.1%       61  36.7% _int_malloc
+      35  21.1%  57.2%       54  32.5% _int_free
+      20  12.0%  69.3%      163  98.2% main
+      19  11.4%  80.7%       19  11.4% malloc_consolidate
+      13   7.8%  88.6%       74  44.6% __GI___libc_malloc
+       8   4.8%  93.4%        8   4.8% is_valid_list
+       4   2.4%  95.8%       13   7.8% SortedList_length
+       2   1.2%  97.0%        3   1.8% thread_action
+       1   0.6%  97.6%        1   0.6% 0x00007ffea1d0f8e5
+       1   0.6%  98.2%        1   0.6% __GI___libc_free
+       1   0.6%  98.8%        1   0.6% _init
+       1   0.6%  99.4%        9   5.4% is_valid_node
+       1   0.6% 100.0%        1   0.6% sysmalloc
+       0   0.0% 100.0%        1   0.6% __GI___clock_gettime
+       0   0.0% 100.0%        3   1.8% __clone
+       0   0.0% 100.0%      163  98.2% __libc_start_main
+       0   0.0% 100.0%      163  98.2% _start
+       0   0.0% 100.0%        3   1.8% start_thread
+ROUTINE ====================== thread_action in /u/eng/class/classnus/Desktop/lab2/lab2b/lab2_list.c
+     2      3 Total samples (flat / cumulative)
+     .      .  203:   // guarentee output and exit
+     .      .  204:   fflush(NULL);
+     .      .  205:   exit(0);
+     .      .  206: }
+     .      .  207: 
+---
+     .      .  208: void *thread_action(void *pointer) {
+     .      .  209:   int ctr, bucket; struct list_info *p = pointer; SortedListElement_t *ptr;
+     .      .  210:   struct timespec *pre_time = &(struct timespec) {0,0};
+     .      .  211:   struct timespec *post_time = &(struct timespec) {0,0};
+     .      .  212:   
+     .      .  213:   // insert items
+     .      .  214:   for(ctr = 0; ctr < p->nelements; ctr++) {
+     .      .  215:     bucket = hash(p->elements[ctr]->key) % p->nlists;
+     1      1  216:     if(p->lists[bucket]->locks.type != NO_LOCK) {
+     .      .  217:       clock_gettime(CLOCK_MONOTONIC, pre_time);
+     .      .  218:       lock(&p->lists[bucket]->locks);
+     .      .  219:       clock_gettime(CLOCK_MONOTONIC, post_time);
+     .      .  220:       *p->time += subtract_times(post_time, pre_time);
+     .      .  221:     }
+     .      .  222:     SortedList_insert(p->lists[bucket]->list, p->elements[ctr]); 
+     .      .  223:     if(p->lists[bucket]->locks.type != NO_LOCK) 
+     .      .  224:       unlock(&p->lists[bucket]->locks);  
+     .      .  225:   }
+     .      .  226: 
+     .      .  227:   // get length
+     .      .  228:   for(ctr = 0; ctr < p->nelements; ctr++) {
+     .      .  229:     bucket = hash(p->elements[ctr]->key) % p->nlists;
+     1      1  230:     if(p->lists[bucket]->locks.type != NO_LOCK) {
+     .      .  231:       clock_gettime(CLOCK_MONOTONIC, pre_time);
+     .      .  232:       lock(&p->lists[bucket]->locks);
+     .      .  233:       clock_gettime(CLOCK_MONOTONIC, post_time);
+     .      .  234:       *p->time += subtract_times(post_time, pre_time);
+     .      .  235:     }
+     .      .  236:     if (SortedList_length(p->lists[bucket]->list) < 0)
+     .      .  237:       error_int("Corrupted List", bucket, 2);
+     .      .  238:     if(p->lists[bucket]->locks.type != NO_LOCK)
+     .      .  239:       unlock(&p->lists[bucket]->locks);
+     .      .  240:   }
+     .      .  241: 
+     .      .  242:   // search and delete
+     .      .  243:   for(ctr = 0; ctr < p->nelements; ctr++)  {
+     .      .  244:     bucket = hash(p->elements[ctr]->key) % p->nlists;
+     .      .  245:     if(p->lists[bucket]->locks.type != NO_LOCK) {
+     .      1  246:       clock_gettime(CLOCK_MONOTONIC, pre_time);
+     .      .  247:       lock(&p->lists[bucket]->locks);
+     .      .  248:       clock_gettime(CLOCK_MONOTONIC, post_time);
+     .      .  249:       *p->time += subtract_times(post_time, pre_time);
+     .      .  250:     }
+     .      .  251:     ptr = SortedList_lookup(p->lists[bucket]->list, p->elements[ctr]->key);
+     .      .  252:     if (ptr == NULL || SortedList_delete(ptr) == 1) 
+     .      .  253:       error_string("Key Not Found", p->elements[ctr]->key, 2);
+     .      .  254:     if(p->lists[bucket]->locks.type != NO_LOCK)
+     .      .  255:       unlock(&p->lists[bucket]->locks);
+     .      .  256:  }
+     .      .  257:   return NULL;
+     .      .  258: }
+---
+     .      .  259: 
+     .      .  260: inline void lock(node_lock *lock) {
+     .      .  261:   if (lock->type == MUTEX_LOCK) pthread_mutex_lock(lock->state.mlock);
+     .      .  262:   else if (lock->type == SPIN_LOCK) while (__sync_lock_test_and_set(lock->state.slock, 1)) ;
+     .      .  263:   else error_int("Could not acquire lock of type", lock->type, 1);
+ROUTINE ====================== thread_action in /u/eng/class/classnus/Desktop/lab2/lab2b/lab2_list.c
+     2      3 Total samples (flat / cumulative)
+     .      .  203:   // guarentee output and exit
+     .      .  204:   fflush(NULL);
+     .      .  205:   exit(0);
+     .      .  206: }
+     .      .  207: 
+---
+     .      .  208: void *thread_action(void *pointer) {
+     .      .  209:   int ctr, bucket; struct list_info *p = pointer; SortedListElement_t *ptr;
+     .      .  210:   struct timespec *pre_time = &(struct timespec) {0,0};
+     .      .  211:   struct timespec *post_time = &(struct timespec) {0,0};
+     .      .  212:   
+     .      .  213:   // insert items
+     .      .  214:   for(ctr = 0; ctr < p->nelements; ctr++) {
+     .      .  215:     bucket = hash(p->elements[ctr]->key) % p->nlists;
+     1      1  216:     if(p->lists[bucket]->locks.type != NO_LOCK) {
+     .      .  217:       clock_gettime(CLOCK_MONOTONIC, pre_time);
+     .      .  218:       lock(&p->lists[bucket]->locks);
+     .      .  219:       clock_gettime(CLOCK_MONOTONIC, post_time);
+     .      .  220:       *p->time += subtract_times(post_time, pre_time);
+     .      .  221:     }
+     .      .  222:     SortedList_insert(p->lists[bucket]->list, p->elements[ctr]); 
+     .      .  223:     if(p->lists[bucket]->locks.type != NO_LOCK) 
+     .      .  224:       unlock(&p->lists[bucket]->locks);  
+     .      .  225:   }
+     .      .  226: 
+     .      .  227:   // get length
+     .      .  228:   for(ctr = 0; ctr < p->nelements; ctr++) {
+     .      .  229:     bucket = hash(p->elements[ctr]->key) % p->nlists;
+     1      1  230:     if(p->lists[bucket]->locks.type != NO_LOCK) {
+     .      .  231:       clock_gettime(CLOCK_MONOTONIC, pre_time);
+     .      .  232:       lock(&p->lists[bucket]->locks);
+     .      .  233:       clock_gettime(CLOCK_MONOTONIC, post_time);
+     .      .  234:       *p->time += subtract_times(post_time, pre_time);
+     .      .  235:     }
+     .      .  236:     if (SortedList_length(p->lists[bucket]->list) < 0)
+     .      .  237:       error_int("Corrupted List", bucket, 2);
+     .      .  238:     if(p->lists[bucket]->locks.type != NO_LOCK)
+     .      .  239:       unlock(&p->lists[bucket]->locks);
+     .      .  240:   }
+     .      .  241: 
+     .      .  242:   // search and delete
+     .      .  243:   for(ctr = 0; ctr < p->nelements; ctr++)  {
+     .      .  244:     bucket = hash(p->elements[ctr]->key) % p->nlists;
+     .      .  245:     if(p->lists[bucket]->locks.type != NO_LOCK) {
+     .      1  246:       clock_gettime(CLOCK_MONOTONIC, pre_time);
+     .      .  247:       lock(&p->lists[bucket]->locks);
+     .      .  248:       clock_gettime(CLOCK_MONOTONIC, post_time);
+     .      .  249:       *p->time += subtract_times(post_time, pre_time);
+     .      .  250:     }
+     .      .  251:     ptr = SortedList_lookup(p->lists[bucket]->list, p->elements[ctr]->key);
+     .      .  252:     if (ptr == NULL || SortedList_delete(ptr) == 1) 
+     .      .  253:       error_string("Key Not Found", p->elements[ctr]->key, 2);
+     .      .  254:     if(p->lists[bucket]->locks.type != NO_LOCK)
+     .      .  255:       unlock(&p->lists[bucket]->locks);
+     .      .  256:  }
+     .      .  257:   return NULL;
+     .      .  258: }
+---
+     .      .  259: 
+     .      .  260: inline void lock(node_lock *lock) {
+     .      .  261:   if (lock->type == MUTEX_LOCK) pthread_mutex_lock(lock->state.mlock);
+     .      .  262:   else if (lock->type == SPIN_LOCK) while (__sync_lock_test_and_set(lock->state.slock, 1)) ;
+     .      .  263:   else error_int("Could not acquire lock of type", lock->type, 1);

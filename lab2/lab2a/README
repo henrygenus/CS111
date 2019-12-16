@@ -1,0 +1,103 @@
+NAME: Henry Genus
+EMAIL: henry.a.genus@ucla.edu
+ID: 304965058
+SLIPDAYS: 0
+
+
+Updates to a shared variable:
+
+ANALYSIS lab2_add-1:
+
+	The non yielding tests required > 1 thread and > 100 iterations to consistently fail.
+	The yielding tests required > 1 thread && > 100 iterations or just > 4 threads.	
+	The failures were much easier with yielding.
+
+QUESTION 2.1.1 -causing conflicts
+	Why does it take many iterations before errors are seen?
+	Why does a significantly smaller number of iterations so seldom fail?
+
+ANSWER 2.1.1:
+	It takes many iterations for errors to be seen because the time in the critical section increases linearly with concurrently running threads, and the critical section is sufficiently short that concurrent execution is unlikely with few threads.  
+	The odds of two threads overlapping can be quite small, but when multiple threads attempt to increment/decrement, the overlap chance is multiplied.
+
+
+ANALYSIS lab2_add-2:
+	Yielding with both two threads and eight threads increases the cost per operation by roughly an order of magnitude, but the change is more drastic with two threads.  
+	
+
+QUESTION 2.1.2 - cost of yielding:
+	Why are the --yield runs so much slower?
+	Where is the additional time going?
+	Is it possible to get valid per-operation timings if we are using the --yield option?
+	If so, explain how. If not, explain why not.
+
+ANSWER 2.1.2:
+	Yield runs are slower because they call yield, giving their CPU up for one iteration through the threads.
+	The additional time goes into context changes and possible other operations running on this CPU.
+	This makes per-operation timing pointless, since each thread has spent some time waiting, and that factors into the average.
+
+ANALYSIS lab2_add-3:
+	The cost per operation goes down as the number of iterations increases at roughly a linear rate of (-1) ns/operation.
+
+QUESTION 2.1.3 - measurement errors:
+	Why does the average cost per operation drop with increasing iterations?
+	If the cost per iteration is a function of the number of iterations, how do we know how many iterations to run (or what the "correct" cost is)?
+
+ANSWER 2.1.3: 
+	The average cost per operation decreases with increasing iterations because creating threads has overhead, and by spending longer in each thread we split that overhead into more operations, lessening its relative effect.  
+	By this logic, the correct cost could be approximated by maximizing iterations.
+
+ANALYSIS lab2_add-4:
+	All three methods of mutual exclusion caused all adds to operate correctly at the maximum iterations and threads.
+	This implies that the race condition has been eliminated, although technically there is a small margin of error where the tests may run correctly only because the race condition may be sufficiently small that it is unlikely to appear in this many iterations.
+
+ANALYSIS lab2_add-5:
+	Unprotected execution only operated correctly in the single thread case, and it operated within a reasonable range of the protection. 
+	The protection methods began to diverge, however, as more threads were introduced.  
+	While all methods of protection seemed to increase as thread number increased, the spin lock was the most drastic.
+	The mutex lock seems to have begun to dip in cost past 8 threads, but this may be due to noise, and it may have just leveled off.
+
+QUESTION 2.1.4 - costs of serialization:
+	Why do all of the options perform similarly for low numbers of threads?
+	Why do the three protected operations slow down as the number of threads rises?
+
+ANSWER 2.1.4:
+	With a low number of threads, not much mutual exclusion is needed, since less threads are vying to add simultaneously; there is therefore less waiting for resources.  
+	The protections slow as threads increase because a thread waiting for a resource will put itself to sleep, and so the processor has to go through scheduling and a context shift. 
+
+
+Updates to a shared complex data structure:
+
+ANALYSIS lab2_add-5:
+	The cost per operation with one thread was roughly the same for both types of thread.	
+	The list operations stay constant until we move beyond 4 threads, while the addition operations increase roughly linearly.  The spin lock for the list, however, begins to increase drastically beyond four threads to approach the CAS and mutex addition operation costs.
+
+QUESTION 2.2.1 - scalability of Mutex
+	Compare the variation in time per mutex-protected operation vs the number of threads in Part-1 (adds) and Part-2 (sorted lists).
+	Comment on the general shapes of the curves, and explain why they have this shape.
+	Comment on the relative rates of increase and differences in the shapes of the curves, and offer an explanation for these differences.
+
+ANSWER 2.2.1:
+	While the mutex lock cost per operation increased as the threads increased in the addition case, it stayed constant in the list.
+	The cost of the addition increased with increasing threads because more threads are vying for access to the processor, so while the number of additions per thread is the same, the OS must do more context switches, and there is more spinning.
+	The list case stays linear because the threads still acquire and release the lock once per
+	node, and therefore perform the same number of operations and context switches.
+
+QUESTION 2.2.2 - scalability of spin locks
+	Compare the variation in time per protected operation vs the number of threads for list operations protected by Mutex vs Spin locks. Comment on the general shapes of the curves, and explain why they have this shape.
+	Comment on the relative rates of increase and differences in the shapes of the curves, and offer an explanation for these differences.
+
+ANSWER 2.2.2:
+	With a small number of threads ( <= 4 ) we find that the mutex and spin lock behave identically; both locks take a constant time per operation.  
+	Beyond four, however, the spin lock shoots up linearly while the mutex stays constant.  
+	The mutex lock is clearly the better choice for lists.
+	The explanation is simple: a mutex lock behaves like a spin lock initially, but transitions to sleep later; it would seem that through four threads, the processors were free enough to re-engage the threads before they went to sleep, but once the threads exceeded that, the mutex lock slept, allowing another processor to work, but the spin locks continued to waste processor time.
+	The spin and mutex locks both increase roughly linearly with thread number for the addition tests, but the spin lock has a greater constant of proportionality.  
+	This makes the mutex lock the better choice for these as well.
+	In contrast to the list example, we find that these two graphs are similar for any number of
+threads.  
+	This is likely because the critical section is so short that the spinning time does not act as the main contributor to per-operation costs.  
+	Beyond four threads, however, we start to see a pattern much like the list--the spin lock continues to spin and eat processor time while the mutex lock sleeps, and therefore the spin lock shoots up in time cost.
+	
+
+
