@@ -149,8 +149,7 @@ int main(int argc, char** argv) {
       break;
 
     case PIPE:
-      if (pipe(pipefd) == -1)
-        opt_error(0, longopts[longindex].name, &failed_opt);
+      if (pipe(pipefd) == -1) opt_error(0, longopts[longindex].name, &failed_opt);
       fds[num_fd++] = pipefd[0];
       fds[num_fd++] = pipefd[1];
       break;
@@ -183,6 +182,8 @@ int main(int argc, char** argv) {
 	  ((errmode != O_WRONLY) && (errmode != O_RDWR))) {
 	opt_error(erridx, "", &failed_opt); break; }
 
+      
+      
       // set range
       boost = optind;
       optind = noptind;
@@ -262,8 +263,6 @@ int main(int argc, char** argv) {
       break;
 
     case ABORT:
-      free(threads);
-      threads = NULL;
       raise(SIGSEGV);
       break;
 
@@ -293,15 +292,10 @@ int main(int argc, char** argv) {
 
     case '?': default:
       // no argument for option with required argument
-      if (longindex != -1) {
-	fprintf(stderr, "No parameter for option \"%s\".\n", longopts[longindex].name);
-	failed_opt = 1;
-    }
+      if (longindex != -1) failed_opt = 1;
       // bad option
       else {
-	fprintf(stderr, "Bad Option: %s\n", argv[optind-1]); 
 	for (ctr = 0; ctr < num_fd; ctr++) close(fds[ctr]);
-	free(threads);
 	exit(1);
       }
     }
@@ -314,19 +308,18 @@ int main(int argc, char** argv) {
     }  
     flag_flag = 0;
   }
-
-  fflush(NULL);
-  for (ctr = 0; ctr < num_fd; ctr++) close(fds[ctr]);
-  free(threads);
   
   if (test_flag) {
     getrusage(RUSAGE_SELF, &usage);
-    fprintf(stdout, "TOTAL TIME: %.5fs| USER TIME: %.5fs| SYS TIME: %.5fs\n",
-	   (usage.ru_utime.tv_sec) + (usage.ru_utime.tv_usec)/1000000.0
-	    + (usage.ru_stime.tv_sec) + (usage.ru_stime.tv_usec)/1000000.0,
+    fprintf(stdout, "TOTAL TIME: %.5fs | USER TIME: %.5fs | SYS TIME: %.5fs\n",
+	    (usage.ru_utime.tv_sec) + (usage.ru_utime.tv_usec)/1000000.0 +
+	    (usage.ru_stime.tv_sec) + (usage.ru_stime.tv_usec)/1000000.0,
 	    (usage.ru_utime.tv_sec) + (usage.ru_utime.tv_usec)/1000000.0,
 	    (usage.ru_stime.tv_sec) + (usage.ru_stime.tv_usec)/1000000.0);
   }
+
+  for (ctr = 0; ctr < num_fd; ctr++) close(fds[ctr]);
+  free(threads);
 
   if (max_signal_value != 0) {
     signal(max_signal_value, SIG_DFL);
@@ -346,26 +339,23 @@ void sig_handler(int sig) {
   _exit(sig);
 }
 
-static inline void print_command(int start_index, int end_index, char** argv) {
-  int ctr;
-  for (ctr = start_index; ctr < end_index; ctr++) {
-    fprintf (stdout, "%s ", argv[ctr]);
-  }
+void print_command(int start_index, int end_index, char** argv) {
+  for (int ctr = start_index; ctr < end_index; ctr++) fprintf (stdout, "%s ", argv[ctr]);
   fprintf(stdout, "\n");
   fflush(NULL);
 }
 
-static inline void print_data(const char* command,
+void print_data(const char* command,
                               struct timeval ru_utime, struct timeval utime, 
 			      struct timeval ru_stime, struct timeval stime) {
   fprintf(stdout, "%-12sUSER CPU TIME: %.3fs", command, 
 	  (ru_utime.tv_sec - utime.tv_sec) + (ru_utime.tv_usec - utime.tv_usec)/1000000.0);
   fprintf(stdout, "%-12sSYSTEM CPU TIME: %.3fs\n", "",
 	  (ru_stime.tv_sec - utime.tv_sec) + (ru_stime.tv_usec - stime.tv_usec)/1000000.0);
+  fflush(NULL);
 }
 
-//far back as command, far forward as --
-static inline void print_option(int opt_index, struct option* longopts, char** argv, int argc) {
+void print_option(int opt_index, struct option* longopts, char** argv, int argc) {
   int start, end, ctr, flag=0;
 
   // determine command start index in argv
@@ -387,11 +377,8 @@ static inline void print_option(int opt_index, struct option* longopts, char** a
   fflush(NULL);
 }
 
-static inline void opt_error(int optint, const char* optstr, int* failed_opt)
-{
-  if (strcmp(optstr, COMMAND_KEYWORD) == 0)
-
-  else if (strcmp(optstr, "") ==0)
+void opt_error(int optint, const char* optstr, int* failed_opt) {
+  if (strcmp(optstr, "") ==0)
     fprintf(stderr, "%s: %i\n", strerror(errno), optint);
   else
     fprintf(stderr, "%s: %s\n", strerror(errno), optstr);
@@ -399,7 +386,7 @@ static inline void opt_error(int optint, const char* optstr, int* failed_opt)
   fflush(stderr);
 }
 
-static inline int string_to_int(char* string) {
+int string_to_int(char* string) {
   int ctr=0, sig=0, mult=1; char num;
   while (string[ctr] != 0)
     ctr++;
@@ -412,5 +399,3 @@ static inline int string_to_int(char* string) {
   }
   return sig;
 }
-
-

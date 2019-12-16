@@ -60,10 +60,10 @@ else
     printf "\tFAILED\n\n"
 fi
 TOT=`expr $TOT + 1`
-rm sol.txt
+rm sol.txt out.txt
 
 echo "Script Test 3..."
-{ cat in.txt & cat in.txt; } | wc -l >> sol.txt 2> err.txt
+cat in.txt | { cat & cat; } | wc -l >> sol.txt 2> err.txt
 ./simpsh --rdonly in.txt \
     --pipe \
     --creat --append --wronly out.txt \
@@ -77,7 +77,7 @@ echo "Script Test 3..."
     --wait \
     --profile \
     --time 
-if [[ $? == 0 ]] && diff -q sol.txt out.txt; then
+if [[ $? == 0 ]] && diff -u sol.txt out.txt; then
     printf "\tPASSED\n\n"
 else
     ERR=`expr $ERR + 1`
