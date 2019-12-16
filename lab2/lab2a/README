@@ -22,7 +22,8 @@ ANSWER 2.1.1:
 	section increases linearly with concurrently running threads, and the critical
 	section is sufficiently short that concurrent execution is unlikely with few
 	threads. The odds of two threads overlapping can be quite small, but when
-	multiple threads attempt to increment/decrement, the overlap chance is multiplied.
+	multiple threads attempt to increment/decrement, the overlap chance is
+	multiplied.
 
 
 ANALYSIS lab2_add-2:
