@@ -28,6 +28,7 @@
 #define SPIN_LOCK 's'
 #define MUTEX_LOCK 'm'
 #define OPS_PER_ITERATION 3
+#define SYS_ERROR system_call_error
 
 static struct option longopts[] = {
   { .name = "threads",     .has_arg = optional_argument,  .flag = NULL,  .val = THREADS    },
@@ -40,15 +41,11 @@ static struct option longopts[] = {
 
 // structs to allow passing of iterations and pointer
 
-/*
-struct add_info
-{ 
-  long long* pointer; 
-  int iterations; 
-  char lock_type; 
-  lock_info lock; 
-};
-*/
+// handler for child thread seg faults
+void handler(int sig) {
+  write(STDERR_FILENO, "ERROR", "Segmentation Fault.", 28);
+  _exit(sig == 2 ? sig : 2);
+}
 
 // union that allows for spin and mutex locks
 typedef union multiple_locks
@@ -80,6 +77,12 @@ struct list_info
   long long *time;
 };
 
+// error message for system call failure
+static inline int system_call_error() {
+  perror(NULL);
+  return 1;
+}
+
 // error message for when parameter is integer      
 static inline void error_int(const char* message, int argument, int code) {
   fprintf(stderr, "%s: %d\n", message, argument);
@@ -91,11 +94,6 @@ static inline void error_string(const char* message, const char* argument, int c
   fprintf(stderr, "%s: %s\n", message, argument);
   exit(code);
 }
-
-// handler for child thread seg faults
-void handler(int sig) {
-  // this always returns 2, I just wanted to get rid of the "sig not used" warning
-  error_string("ERROR", "Segmentation Fault.", sig == 2 ? sig : 2); }
 
 // subtracts two time structures
 static inline long long subtract_times(struct timespec *end_time, struct timespec *start_time) {

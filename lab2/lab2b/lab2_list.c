@@ -1,10 +1,9 @@
 #include "lab2.h"
-
-#include <stdio.h> //fprintf                                                                       
+#include <stdio.h> //fprintf
 #include <stdlib.h> //exit
-#include <string.h> // strerror                                                                    
-#include <errno.h> //errno                                                                         
-#include <time.h> //gettime, clock constant                                                        
+#include <string.h> // strerror
+#include <errno.h> //errno     
+#include <time.h> //gettime, clock constant
 #include <pthread.h> //threads
 #include <signal.h> // signal(2)
 
@@ -18,7 +17,7 @@ int opt_yield = 0;
 int main(int argc, char** argv) {
 
   //utility variables
-  int ctr, opt, len, longindex, noperations, nthreads, niterations, nlists; 
+  int ctr, opt, len, longindex, noperations, nthreads, niterations, nlists, nelements; 
   char name[16] = "list"; char flags[6] = "-none"; char lock_type[6] = "-none";
 
   // time related variables
@@ -40,10 +39,9 @@ int main(int argc, char** argv) {
   fprintf(stderr, "\n");
   */
 
-  // get thread and iteration number                                                               
+  // get thread and iteration number
   while(1) {
-    if ((opt = getopt_long(argc, argv, "", longopts, &longindex)) == -1)
-      break;
+    if ((opt = getopt_long(argc, argv, "", longopts, &longindex)) == -1) break;
     switch(opt) {
     case THREADS:
       nthreads = (optarg == NULL ? 1 : string_to_int(optarg));
@@ -72,7 +70,8 @@ int main(int argc, char** argv) {
     case SYNC:
       if (*optarg != MUTEX_LOCK && *optarg != SPIN_LOCK)
 	error_string("Bad parameter", optarg, 1);
-      else { strcpy(lock_type, "-"); strcat(lock_type, optarg); }
+      strcpy(lock_type, "-");
+      strcat(lock_type, optarg); 
       break;      
     default:
       exit(1);
@@ -80,40 +79,42 @@ int main(int argc, char** argv) {
     }
   }  
 
-  // check thread and iteration numbers                                                            
+  // check thread and iteration numbers
   if (nthreads <= 0) error_int("Invalid thread number", nthreads, 1); 
   else if (niterations < 0) error_int("Invalid iteration number", nthreads, 1); 
   else if (nlists < 0) error_int("invalid list number", nlists, 1);
 
-  // allocate space 
-  threads = (pthread_t*)malloc(nthreads*sizeof(pthread_t));
-  info = (struct list_info*)malloc(nthreads*sizeof(struct list_info));
-
-  keys = (char**)malloc(nthreads*niterations*sizeof(char*));
-  times = (long long*)malloc(nthreads*niterations*sizeof(long long));
-  elements = (SortedListElement_t**)malloc(nthreads*niterations*sizeof(SortedListElement_t*));
-
-  locked_lists = (lock_and_node**)malloc(nlists*sizeof(lock_and_node*)); 
-  locks = (node_lock**)malloc(nlists*sizeof(node_lock*));
-
   // initialize data
   strcat(name, flags);
   strcat(name, lock_type);
-  noperations = nthreads*niterations*OPS_PER_ITERATION;
+  nelements = nthreads*niterations;
+  noperations = nelements*OPS_PER_ITERATION;
+  
+  // allocate space 
+  if (!(threads = (pthread_t*)malloc(nthreads*sizeof(pthread_t)))) exit(SYS_ERROR);
+  if (!(info = (struct list_info*)malloc(nthreads*sizeof(struct list_info)))) EXIT(SYS_ERROR);
+
+  if (!(keys = (char**)malloc(nelements*sizeof(char*)))) exit(SYS_ERROR);
+  if (!(times = (long long*)malloc(nelements*sizeof(long long)))) exit(SYS_ERROR);
+  if (!(elements = (SortedListElement_t**)malloc(nelements*sizeof(SortedListElement_t*))))
+    exit(SYS_ERROR);
+
+  if (!(locked_lists = (lock_and_node**)malloc(nlists*sizeof(lock_and_node*)))) exit(SYS_ERROR); 
+  if (!(locks = (node_lock**)malloc(nlists*sizeof(node_lock*)))) exit(SYS_ERROR);
+
   // need to give memory & assign locks still
   for (ctr = 0; ctr < nlists; ctr++) {
     //make lock
-    locks[ctr] = (node_lock*)malloc(sizeof(node_lock));
+    if (!(locks[ctr] = (node_lock*)malloc(sizeof(node_lock)))) exit(SYS_ERROR);
     // if there is one thread, a lock is pointless
     if (nthreads != 1) {      
       if (lock_type[1] == MUTEX_LOCK) {
-	mutexptr = (pthread_mutex_t*)malloc(sizeof(pthread_mutex_t));
+	if (!(mutexptr = (pthread_mutex_t*)malloc(sizeof(pthread_mutex_t)))) exit(SYS_ERROR);
 	lock_union.mlock = mutexptr;
-	if (pthread_mutex_init(lock_union.mlock, NULL) == -1)
-	  error_int("Could not initialize lock of number", ctr, 1);
+	if (pthread_mutex_init(lock_union.mlock, NULL) == -1) exit(SYS_ERROR);
       }
       if (lock_type[1] ==  SPIN_LOCK) {
-	spinptr = (int*)malloc(sizeof(int));
+	if (!(spinptr = (int*)malloc(sizeof(int)))) exit(SYS_ERROR);
 	lock_union.slock = spinptr;
 	*lock_union.slock = 0;
       }
@@ -121,26 +122,25 @@ int main(int argc, char** argv) {
     *locks[ctr] = (node_lock) {lock_union, nthreads == 1 ? NO_LOCK : lock_type[1]};
     
     // make list node
-    list = (SortedList_t*)malloc(sizeof(SortedList_t));
+    if (!(list = (SortedList_t*)malloc(sizeof(SortedList_t)))) exit(SYS_ERROR);
     *list = (SortedList_t) {list, list, NULL};
-    locked_lists[ctr] = (lock_and_node*)malloc(sizeof(lock_and_node));
+    if (!(locked_lists[ctr] = (lock_and_node*)malloc(sizeof(lock_and_node)))) exit(SYS_ERROR);
     *locked_lists[ctr] = (lock_and_node) {*locks[ctr], list};
   }
   // make list elements
-  for (ctr = 0; ctr < nthreads*niterations; ctr++) {
+  for (ctr = 0; ctr < nelements; ctr++) {
     times[ctr] = 0;
-    keys[ctr] = (char*)malloc(((len = get_length()) + 1) * sizeof(char));
+    if (!(keys[ctr] = (char*)malloc(((len = get_length()) + 1) * sizeof(char)))) exit(SYS_ERROR);
     set_string(keys[ctr], len);
-    elements[ctr] = (SortedListElement_t*)malloc(sizeof(SortedList_t));
+    if (!(elements[ctr] = (SortedListElement_t*)malloc(sizeof(SortedList_t)))) exit(SYS_ERROR);
     *elements[ctr] = (SortedListElement_t){NULL, NULL, keys[ctr]};
   }
 
   // ignore  seg faults for threads
-  signal(SIGSEGV, handler);
+  if (signal(SIGSEGV, handler) == SIG_ERR) exit(SYS_ERROR);
 
-  //get pre-action time                                                                           
-  if(clock_gettime(CLOCK_REALTIME, start_time) == -1)
-    error_string(strerror(errno), "pre-operation time", 1);
+  //get pre-action time
+  if (clock_gettime(CLOCK_REALTIME, start_time) == -1) exit(SYS_ERROR);
 
   // create threads
   for(ctr=0; ctr < nthreads; ctr++) {
@@ -152,20 +152,19 @@ int main(int argc, char** argv) {
       niterations, 
       &times[ctr]
     };
-    pthread_create(&threads[ctr], NULL, thread_action, &info[ctr]); 
+    if (pthread_create(&threads[ctr], NULL, thread_action, &info[ctr])) exit(SYS_ERROR); 
   }
 
   // collect threads                                                                              
   for(ctr=0; ctr < nthreads; ctr++) 
-    if (pthread_join(threads[ctr], NULL)) error_int(strerror(errno), threads[ctr], 0);
+    if (pthread_join(threads[ctr], NULL)) exit(SYS_ERROR);
 
-  // get accumulated time                                                                         
-  if(clock_gettime(CLOCK_REALTIME, end_time) == -1)
-    error_string(strerror(errno), "post-operation time", 1);
+  // get accumulated time                                                                        
+  if(clock_gettime(CLOCK_REALTIME, end_time) == -1) exit(SYS_ERROR);
   else time = subtract_times(end_time, start_time);
 
   // reset seg fault response
-  signal(SIGSEGV, SIG_DFL);
+  if (signal(SIGSEGV, SIG_DFL) == SIG_ERR) exit(SYS_ERROR);
 
   // post-action housekeeping & sanity check
   for (ctr = 0; ctr < nlists; ctr++) {
@@ -176,15 +175,15 @@ int main(int argc, char** argv) {
     free(locked_lists[ctr]->list);
     if (nthreads != 1) {
       if (lock_type[1] == MUTEX_LOCK) {
-	pthread_mutex_destroy(locks[ctr]->state.mlock);
+	if (pthread_mutex_destroy(locks[ctr]->state.mlock)) exit(SYS_ERROR);
 	free(locks[ctr]->state.mlock);
       }
-      else if (lock_type[1] == SPIN_LOCK)
-	free(locks[ctr]->state.slock);
+      else if (lock_type[1] == SPIN_LOCK) free(locks[ctr]->state.slock);
     }
     free(locks[ctr]);
     free(locked_lists[ctr]);
   }
+  
   for (ctr = 0; ctr < nthreads*niterations; ctr++) {
     wait_time += times[ctr];
     free(keys[ctr]);
@@ -197,7 +196,8 @@ int main(int argc, char** argv) {
   free(times);
 
   // output
-  fprintf(stdout, "%s,%i,%i,%i,%i,%lli,%lli,%lli\n", name, nthreads, niterations, nlists, noperations,
+  fprintf(stdout, "%s,%i,%i,%i,%i,%lli,%lli,%lli\n", name,
+	  nthreads, niterations, nlists, noperations,
 	  time, time/(long)noperations, wait_time/((long)noperations));
 
   // guarentee output and exit
@@ -220,8 +220,7 @@ void *thread_action(void *pointer) {
       *p->time += subtract_times(post_time, pre_time);
     }
     SortedList_insert(p->lists[bucket]->list, p->elements[ctr]); 
-    if(p->lists[bucket]->locks.type != NO_LOCK) 
-      unlock(&p->lists[bucket]->locks);  
+    if(p->lists[bucket]->locks.type != NO_LOCK) unlock(&p->lists[bucket]->locks);  
   }
 
   // get length
@@ -235,8 +234,7 @@ void *thread_action(void *pointer) {
     }
     if (SortedList_length(p->lists[bucket]->list) < 0)
       error_int("Corrupted List", bucket, 2);
-    if(p->lists[bucket]->locks.type != NO_LOCK)
-      unlock(&p->lists[bucket]->locks);
+    if(p->lists[bucket]->locks.type != NO_LOCK) unlock(&p->lists[bucket]->locks);
   }
 
   // search and delete
@@ -249,10 +247,9 @@ void *thread_action(void *pointer) {
       *p->time += subtract_times(post_time, pre_time);
     }
     ptr = SortedList_lookup(p->lists[bucket]->list, p->elements[ctr]->key);
-    if (ptr == NULL || SortedList_delete(ptr) == 1) 
+    if (ptr == NULL || SortedList_delete(ptr) == 1)
       error_string("Key Not Found", p->elements[ctr]->key, 2);
-    if(p->lists[bucket]->locks.type != NO_LOCK)
-      unlock(&p->lists[bucket]->locks);
+    if(p->lists[bucket]->locks.type != NO_LOCK) unlock(&p->lists[bucket]->locks);
  }
   return NULL;
 }

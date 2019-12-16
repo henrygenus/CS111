@@ -35,7 +35,7 @@ inline void unlock(lock_info* lock, char lock_type);
 
 int main(int argc, char** argv) {
   //utility variables
-  int ctr, opt, len, longindex, ret=0, nthreads = 1, niterations = -1, noperations, nruns; 
+  int ctr, opt, len, longindex, ret=0, nthreads = 1, niterations = -1, noperations, nelements; 
   char name[16] = "list"; char flags[6] = "-none"; char lock_type[6] = "-none";
   // time related variables
   struct timespec* start_time = &(struct timespec){0,0};
@@ -103,10 +103,10 @@ int main(int argc, char** argv) {
   // create list elements
   if (!(elements = (SortedListElement_t**)malloc(nelements*sizeof(SortedListElement_t*))))
     exit(SYS_ERROR);
-  if (!(keys = (char**)malloc(nruns*sizeof(char*)))) exit(SYS_ERROR);
+  if (!(keys = (char**)malloc(nelements*sizeof(char*)))) exit(SYS_ERROR);
   for (ctr = 0; ctr < nelements; ctr++) {
     len = (5);
-    if (!(keys[ctr] = (char*)malloc(len+1 * sizeof(char)))) EXIT(SYS_ERROR);
+    if (!(keys[ctr] = (char*)malloc(len+1 * sizeof(char)))) exit(SYS_ERROR);
     set_string(keys[ctr], len);
     if (!(elements[ctr] = malloc(sizeof(SortedListElement_t)))) exit(SYS_ERROR);
     *elements[ctr] = (SortedListElement_t){NULL, NULL, keys[ctr]};

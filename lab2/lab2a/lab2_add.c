@@ -11,7 +11,7 @@
 
 void add(long long *pointer, long long value);
 void atomic_add(long long* pointer, long long value);
-void* thread_action(void *pointer);
+void *thread_action(void *pointer);
 inline void lock(lock_info *lock, char lock_type);
 inline void unlock(lock_info *lock, char lock_type);
 
@@ -64,7 +64,7 @@ int main(int argc, char** argv) {
   if(clock_gettime(CLOCK_REALTIME, start_time) == -1) exit(SYS_ERROR);
 
   //create threads
-  threads = (pthread_t*)malloc(nthreads*sizeof(pthread_t));
+  if (!(threads = (pthread_t*)malloc(nthreads*sizeof(pthread_t)))) exit(SYS_ERROR);
   for(ctr=0; ctr < nthreads; ctr++) {
     structure = (struct add_info){&counter, niterations, lock_type[1], lock_union};
     if (pthread_create(&threads[ctr], NULL, thread_action, &structure)) exit(SYS_ERROR);

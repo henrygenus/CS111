@@ -69,25 +69,25 @@ int SortedList_length(SortedList_t *list) {
 ///////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////// UTILITIES ////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////
-inline void point_at(SortedListElement_t *first, SortedListElement_t *second) {
+void point_at(SortedListElement_t *first, SortedListElement_t *second) {
   first->next = second;
   second->prev = first;
 }
 
-inline void put_between(SortedListElement_t *first, SortedListElement_t *second, 
+void put_between(SortedListElement_t *first, SortedListElement_t *second, 
 		       SortedListElement_t *middle) {
   point_at(first, middle);
   point_at(middle, second);
 }
 
-inline int is_valid_node(SortedListElement_t *node) {
+int is_valid_node(SortedListElement_t *node) {
   return (is_valid_list(node) && 
 	  (node->key == NULL 
 	   || (node->next != node && node->prev != node && 
 	       strlen(node->key) <= MAX_LENGTH && strlen(node->key) >= MIN_LENGTH)));
 }
 
-inline int is_valid_list(SortedList_t *list) {
+int is_valid_list(SortedList_t *list) {
   return (list != NULL && list->next != NULL && list->prev != NULL && 
 	  list->next->prev != NULL && list->prev->next != NULL &&
 	  list->next->prev == list && list->prev->next == list);

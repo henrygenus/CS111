@@ -43,9 +43,9 @@ struct add_info
 };
 
 // error message for system calls
-static inline _Noreturn system_call_error() {
+static inline int system_call_error() {
   perror(NULL);
-  exit(1);
+  return 1;
 }
 
 // error message for when parameter is integer      
