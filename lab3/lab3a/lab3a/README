@@ -1,0 +1,11 @@
+NAME: Henry Genus
+EMAIL: henry.a.genus@g.ucla.edu
+ID: 304965058
+
+Makefile: 	A Makefile to build and run the deliverable program
+main.c:		The operating code to print a file system contents
+lab3.h:		Declarations of utility functions
+lab3.c:		Definitions of same utility functions
+ext2_fs.h:	EXT2 file system structs and functions
+
+Testing was done with the given test script and given file system IMG's.

@@ -1,84 +1,0 @@
-Script started on Thu Nov 21 00:02:03 2019
-
-The default interactive shell is now zsh.
-To update your account to use zsh, please run `chsh -s /bin/zsh`.
-For more details, please visit https://support.apple.com/kb/HT208050.
-[?1034hbash-3.2$ url2pdf --url=file:http://web.cs.ucla.edu/classes/fall19/cs111/labs/P3 B_analyze/ASSIGNMENT/P3B.html
-bash: url2pdf: command not found
-bash-3.2$ url2pdf --url=file:http://web.cs.ucla.edu/classes/fall19/cs111/labs/P3BB_analyze/ASSIGNMENT/P3B.html[A[C[C[C[C[C[C[C[C[C[C[35Pssh classnus@lnxsrv09.seas.ucla.edu
-[K[A[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[Cls[Kcd CLASS/Programming/CS111[C[C[C[C[C[C[C[C[C[Cls[Kssh classnus@lnxsrv09.seas.ucla.edu[C[C[C[C[C[C[C[C[C[Ccd Deskto[Kscp ./lab3b-304965058.tar.gz classnus@lnxsrv.seas.ucla.edu:~/Desktop/laab3/lab3b[A[Ccd Deskto[K
-[K[A[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[Cscp ./lab3b-304965058.tar.gz classnus@lnxsrv.seas.ucla.edu:~/Desktop/laab3/lab3b[A[Cmake dist[K
-[K[A[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[Cclean[1Pdistscp ./lab3b-304965058.tar.gz classnus@lnxsrv.seas.ucla.edu:~/Desktop/laab3/lab3b[A[Ccd Deskto[K
-[K[A[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[Cssh classnus@lnxsrv09.seas.ucla.edu[C[C[C[C[C[C[C[C[C[Cls[Kcd CLASS/Programming/CS111[C[C[C[C[C[C[C[C[C[Cls[Kssh classnus@lnxsrv09.seas.ucla.edu[C[C[C[C[C[C[C[C[C[Curl2pdf --url=file:http://web.cs.ucla.edu/classes/fall19/cs111/labs/P3BB_analyze/ASSIGNMENT/P3B.html[A[C[C[C[C[C[C[C[C[C[C[K
-[K[A[C[C[C[C[C[C[C[C[C[Curl2pdf --url=file:http://web.cs.ucla.edu/classes/fall19/cs111/labs/P3BB_analyze/ASSIGNMENT/P3B.html[A[C[C[C[C[C[C[C[C[C[C[K
-[K[A[C[C[C[C[C[C[C[C[C[Cls
-Block.py			__pycache__
-DownloadURLsAsPDFs.applescript	constants.py
-Inode.py			lab3b
-Makefile			lab3b-304965058.tar.gz
-README				lab3b.py
-UIController			venv
-bash-3.2$ /Users/henrygenus/Downloads/url2pdf 
-bash: /Users/henrygenus/Downloads/url2pdf: Permission denied
-bash-3.2$ chmpd [K[K[Kod +x http://web.cs.ucla.edu/classes/fall19/cs111/labs/P3B_analyze/ ASSIGNMENT/P3B.html\\[K[K[K[K[A[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[K
-[K[A[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[K[K[K[K[K[K[K[K[K[K[Kx /Users/henrygenus/Downloads/url2pdf
-bash-3.2$ chmod +x /Users/henrygenus/Downloads/url2pdf[C[C[C[C[C[C[C[C[C[C[8P/Users/henrygenus/Downloads/url2pdf 
-Killed: 9
-bash-3.2$ /Users/henrygenus/Downloads/url2pdf --url=file:///http://web.cs.ucla.e du/classes/fall19/cs111/labs/P3B_analyze/ASSIGNMENT/P3B.html
-Failed to load URL
-bash-3.2$ /Users/henrygenus/Downloads/url2pdf --url=file:///http://web.cs.ucla.eddu/classes/fall19/cs111/labs/P3B_analyze/ASSIGNMENT/P3B.html[C[C[C[A[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[Chttp://web.cs.ucla.edu[1P/classes/fall19/cs111/labs/P3B_analyze/ASSIGNMENT/P3B.html[Ahttp://web.cs.ucla.edu/[1Pclasses/fall19/cs111/labs/P3B_analyze/ASSIGNMENT/P3B.html[Ahttp://web.cs.ucla.edu/c[1Plasses/fall19/cs111/labs/P3B_analyze/ASSIGNMENT/P3B.html[A
-
-Failed to load URL
-bash-3.2$ /Users/henrygenus/Downloads/url2pdf --url=file:http://web.cs.ucla.edu/cclasses/fall19/cs111/labs/P3B_analyze/ASSIGNMENT/P3B.html[A[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C/http://web.cs.ucla.edu/classes/fall19/cs111/labs/P3B_analyze/ASSIGNMENT/P3B.html[A/http://web.cs.ucla.edu/classes/fall19/cs111/labs/P3B_analyze/ASSIGNMENT/P3B.html[A
-
-Failed to load URL
-bash-3.2$ /Users/henrygenus/Downloads/url2pdf --url=file://http://web.cs.ucla.eduu/classes/fall19/cs111/labs/P3B_analyze/ASSIGNMENT/P3B.html[C[C[A[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[Chttp://web.cs.ucla.edu/[1Pclasses/fall19/cs111/labs/P3B_analyze/ASSIGNMENT/P3B.html[A
-
-Failed to load URL
-bash-3.2$ /Users/henrygenus/Downloads/url2pdf --url=file:/http://web.cs.ucla.edu//classes/fall19/cs111/labs/P3B_analyze/ASSIGNMENT/P3B.html[C[A[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[K
-[K[A[C[C[C[C[C[C[C[C[C[Cls
-Block.py			__pycache__
-DownloadURLsAsPDFs.applescript	constants.py
-Inode.py			lab3b
-Makefile			lab3b-304965058.tar.gz
-README				lab3b.py
-UIController			venv
-bash-3.2$ wget http://web.cs.ucla.edu/classes/fall19/cs111/labs/P3B_analyze/ASSI GNMENT/P3B.html
---2019-11-21 00:05:26--  http://web.cs.ucla.edu/classes/fall19/cs111/labs/P3B_analyze/ASSIGNMENT/P3B.html
-Resolving web.cs.ucla.edu (web.cs.ucla.edu)... 131.179.128.29
-Connecting to web.cs.ucla.edu (web.cs.ucla.edu)|131.179.128.29|:80... connected.
-HTTP request sent, awaiting response... 200 OK
-Length: 16112 (16K) [text/html]
-Saving to: ‘P3B.html’
-
-P3B.html              0%[                    ]       0  --.-KB/s               P3B.html            100%[===================>]  15.73K  --.-KB/s    in 0.009s  
-
-2019-11-21 00:05:26 (1.71 MB/s) - ‘P3B.html’ saved [16112/16112]
-
-bash-3.2$ ls
-Block.py			__pycache__
-DownloadURLsAsPDFs.applescript	constants.py
-Inode.py			lab3b
-Makefile			lab3b-304965058.tar.gz
-P3B.html			lab3b.py
-README				venv
-UIController
-bash-3.2$ ls[Klswget http://web.cs.ucla.edu/classes/fall19/cs111/labs/P3B_analyze/ASSIGGNMENT/P3B.html[Als[K
-[K[A[C[C[C[C[C[C[C[C[C[C[C[C/Users/henrygenus/Downloads/url2pdf --url=file:/http://web.cs.ucla.edu//classes/fall19/cs111/labs/P3B_analyze/ASSIGNMENT/P3B.html[A/http://web.cs.ucla.edu/classes/fall19/cs111/labs/P3B_analyze/ASSIGNMENT/P3B.html[Ahttp://web.cs.ucla.edu/[1Pclasses/fall19/cs111/labs/P3B_analyze/ASSIGNMENT/P3B.html[K[K[K[K[K[K[K[K[C[K[A[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[K
-[K[A[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[K[K[K[K[K[K[K[K[K[K[K///[K[K[K./P3B.html
-Failed to load URL
-bash-3.2$ /Users/henrygenus/Downloads/url2pdf --url=file:./P3B.html/./P3B.html/./P3B.html/./P3B.html
-Failed to load URL
-bash-3.2$ /Users/henrygenus/Downloads/url2pdf --url=file:///./P3B.html[1PP3B.html[1PP3B.html[1PP3B.html[1PP3B.html[1PP3B.html$P3B.html[CP3B.htmlWP3B.htmlDP3B.html/P3B.html
-/Users/henrygenus/Desktop/Project 3B.pdfbash-3.2$ ls
-Block.py			__pycache__
-DownloadURLsAsPDFs.applescript	constants.py
-Inode.py			lab3b
-Makefile			lab3b-304965058.tar.gz
-P3B.html			lab3b.py
-README				venv
-UIController
-bash-3.2$ cat /Users/henrygenus/Desktop/Project 3B.pd
-cat: /Users/henrygenus/Desktop/Project: No such file or directory
-cat: 3B.pd: No such file or directory
-bash-3.2$ cat /Users/henrygenus/Desktop/Project 3B.pd[C[C[C[C[C[C[C[C[C[C[K
