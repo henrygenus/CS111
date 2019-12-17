@@ -6,6 +6,10 @@
 #include <sys/types.h> // wait
 #include <sys/wait.h> // wait
 
+inline int try_to_fork(int *pid) {
+				if ((*pid = fork()) == -1) return SYS_ERROR;
+				else return *pid;
+}
 
 int main(int argc, char **argv) {
     // utility variables
@@ -41,7 +45,8 @@ int main(int argc, char **argv) {
     
     // ////////////////////// child: device /////////////////////
     // runs lab4b program with writes to log
-    if ((device_pid = fork()) == 0) {
+				if (try_to_fork(&device_pid) == -1) exit(RUNTIME_ERROR);
+				else if (device_pid == 0) {
         if (DEBUG_PRINT) fprintf(stderr, "DEV PREPPING (%i)\n", getpid());
         // close other pipes
         close(parent_pipe[WRITE]);
@@ -57,18 +62,14 @@ int main(int argc, char **argv) {
 								perror(NULL);
         exit(1);
     }
-    // fork failure
-    else if (device_pid == -1) {
-        fprintf(stderr, "%s\n", strerror(errno));
-        exit(1);
-    }
     
     // ////////////////// parent: moderator ///////////////////
     // mediates communication between device and server
     // split in 2 for contact between device & server
     
     // server -> device
-    if ((srv_to_dev = fork()) == 0) {
+				if (try_to_fork(&srv_to_dev) == -1) exit(RUNTIME_ERROR);
+				else if (srv_to_dev == 0) {
         if (DEBUG_PRINT) fprintf(stderr, "SRV->DEV PREPPING (%i)\n", getpid());
         // close other pipes
         close(parent_pipe[READ]);
@@ -88,14 +89,10 @@ int main(int argc, char **argv) {
         close(parent_pipe[WRITE]);
         exit(0);
     }
-    // fork failure
-    else if (srv_to_dev == -1) {
-        fprintf(stderr, "%s\n", strerror(errno));
-        exit(1);
-    }
 
     // device -> server
-    else if ((dev_to_srv = fork()) == 0) {
+				if (try_to_fork(&dev_to_srv) == -1) exit(RUNTIME_ERROR);
+    else if (dev_to_srv == 0) {
         if (DEBUG_PRINT) fprintf(stderr, "DEV->SRV PREPPING (%i)\n", getpid());
         // close other pipes
         close(parent_pipe[WRITE]);
@@ -117,14 +114,8 @@ int main(int argc, char **argv) {
         close(server);
         close(parent_pipe[READ]);
         exit(0);
-
     }
-    // fork failure
-    else if (dev_to_srv == -1) {
-        fprintf(stderr, "%s\n", strerror(errno));
-        exit(1);
-    }
-    
+				
     // check return statuses
     while((pid = wait(&wstatus)) != -1) {
         if (DEBUG_PRINT)
