@@ -6,7 +6,7 @@
 #include <sys/types.h> // wait
 #include <sys/wait.h> // wait
 
-inline int try_to_fork(int *pid) {
+static inline int try_to_fork(int *pid) {
 				if ((*pid = fork()) == -1) return SYS_ERROR;
 				else return *pid;
 }
@@ -27,20 +27,16 @@ int main(int argc, char **argv) {
     int tls_flag = (strcmp(&argv[0][++ctr], "lab4c_tls") == 0);
     if (DEBUG_PRINT) fprintf(stderr, "%i", tls_flag);
         
-    // initialize connection with server
-    process_command_line(argc, argv, &tcp, args);
-    check_options(&tcp, parent_pipe, child_pipe);
-    server = client_connect(tcp.host, tcp.portno);
+    // handle command line
+    if (process_command_line(argc, argv, &tcp, args) == -1) exit(1);
+    else if (check_options(&tcp) == -1) exit(1);
+				else if (pipe(parent_pipe) == -1 || pipe(child_pipe) == -1) exit(RUNTIME_ERROR);
+    else exchange_pipes(parent_pipe, child_pipe);
     
-    // initialize tls connection (optional)
-    if (tls_flag) {
-        if ((context = ssl_init()) == NULL) {
-            fprintf(stderr, "%s\n", strerror(errno));
-            exit(2);
-        }
-        ssl_client = attach_ssl_to_socket(server, context);
-    }
-    
+				// connect with server
+				if (srv_connect(tcp, tls_flag, &server, context, ssl_client) == -1)
+								exit(RUNTIME_ERROR);
+				
     if (DEBUG_PRINT) fprintf(stderr, "Parent Process PID: %i\n", getpid());
     
     // ////////////////////// child: device /////////////////////
@@ -60,7 +56,7 @@ int main(int argc, char **argv) {
      
         // if we reach here, there was an error
 								perror(NULL);
-        exit(1);
+        exit(RUNTIME_ERROR);
     }
     
     // ////////////////// parent: moderator ///////////////////

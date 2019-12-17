@@ -18,6 +18,17 @@ static struct option longopts[] = {
     { 0, 0, 0, 0 }
 };
 
+/*
+	* server connection functions
+	*/
+// connect via tcp to server, return fd
+int client_connect(char * host_name, unsigned int port);
+// create a tls context
+SSL_CTX *ssl_init(void);
+// bind a socket to a tls context
+SSL *attach_ssl_to_socket(int socket, SSL_CTX *context);
+
+
 // ////////////////////////////////////////////////////////////////////////
 // ////////////////////// FUNCTION IMPLEMENTATIONS ////////////////////////
 // ////////////////////////////////////////////////////////////////////////
@@ -52,7 +63,7 @@ int process_command_line(int argc, char** argv, tcp *tcp, char **args) {
             continue;
         else if (tcp->portno != -1) {
             fprintf(stderr, "Multiple port numbers given");
-            exit(1);
+												return -1;
         }
         else tcp->portno = atoi(argv[ctr]);
     }
@@ -78,31 +89,38 @@ void process_output(port *from, port *to, int device_flag) {
     } while (! last_entry(device_flag, buffer));
 }
 
-void check_options(tcp *tcp, int parent_pipe[2], int child_pipe[2]) {
-    if (strlen(tcp->id) < 9)
-        { fprintf(stderr, "Bad ID number\n"); exit(1); }
-    else if (strlen(tcp->host) <= 0)
-        { fprintf(stderr, "Bad host name\n"); exit(1); }
+int check_options(tcp *tcp) {
+    if (strlen(tcp->id) < 9) fprintf(stderr, "Bad ID number\n");
+    else if (strlen(tcp->host) <= 0) fprintf(stderr, "Bad host name\n");
     else if (tcp->logfile == NULL || strlen(tcp->logfile) <= 0)
-        { fprintf(stderr, "Bad logfile name\n"); exit(1); }
-    else if(tcp->portno <= 0)
-        { fprintf(stderr, "Bad port numbern\n"); exit(1); }
-    else if (pipe(parent_pipe) == -1 || pipe(child_pipe) == -1)
-        { fprintf(stderr, "%s\n", strerror(errno)); exit(1); }
-    else exchange_pipes(parent_pipe, child_pipe);
+								fprintf(stderr, "Bad logfile name\n");
+    else if(tcp->portno <= 0) fprintf(stderr, "Bad port numbern\n");
+				return 0;
 }
 
 // ////////////////////////////////////////////////////////////////////////
 // //////////////////////// SERVER FUNCTIONS //////////////////////////////
 // ////////////////////////////////////////////////////////////////////////
 
+int srv_connect(tcp tcp, bool tls_flag, int *server, SSL_CTX *context, SSL *client) {
+				if ((*server = client_connect(tcp.host, tcp.portno)) == -1) return -1;
+    
+    // initialize tls connection (optional)
+    if (tls_flag) {
+								if ((context = ssl_init()) == NULL) return SYS_ERROR;
+        if ((client = attach_ssl_to_socket(*server, context)) == NULL)
+												return SYS_ERROR;
+    }
+				return 0;
+}
+
 int client_connect(char *host_name, unsigned int port) {
     //encode the ip address and the port for the remote
     struct sockaddr_in serv_addr;
-    int sockfd = socket(AF_INET, SOCK_STREAM, 0);
+				int sockfd;
+				if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) == -1) return SYS_ERROR;
     struct hostent *server = NULL;
-    if((server = gethostbyname(host_name)) == NULL)
-        {fprintf(stderr, "%s\n", strerror(errno)); exit(1);};
+				if((server = gethostbyname(host_name)) == NULL) return SYS_ERROR;
    
     // convert host_name to IP addr
     memset(&serv_addr, 0, sizeof(struct sockaddr_in));
@@ -113,8 +131,9 @@ int client_connect(char *host_name, unsigned int port) {
     serv_addr.sin_port = htons(port); //setup the port
     
     //initiate the connection to server
-    connect(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr));
-    return sockfd;
+    if (connect(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) == -1)
+								return SYS_ERROR;
+				return sockfd;
 }
 
 SSL_CTX *ssl_init(void) {
@@ -169,4 +188,9 @@ bool subcmp(const char *string1, const char *string2, unsigned int len){
     for(ctr = 0; ctr < len; ctr++)
         if (string1[ctr] != string2[ctr]) return false;
     return true;
+}
+
+int _system_call_error_(char *arg) {
+				perror(arg);
+				return -1;
 }
