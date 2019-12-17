@@ -26,26 +26,35 @@ extern __u32 block_size;
 /*
 * utility functions
 */
+
 // for use with above constants
 int print_error_msg(char *error_msg);
+
 // get the block address from the index
 __u32 resolve_address(__u32 absolute_block_id);
+
 // test if a given block in a bitmap is free
 __u8 is_used(int block_num, __u8 *bitmap);
 
 /*
  * ext2 structure printing functions
  */
+
 // print the information required for a super block
 void print_super(struct ext2_super_block *super);
+
 // print the information required for a group
 void print_group(struct ext2_group_desc *group, __u32 group_num,  __u32 blocks_in_group, __u32 inodes_in_group);
+
 // print the information required for a pure inode
 void print_inode(struct ext2_inode *inode, __u32 inode_id);
+
 // print all directory entries recursively
 __u32 print_directory(struct ext2_inode *directory, int fd, int dir_inode_num);
+
 // print info for all blocks of an inode (recursive)
 void print_blocks(struct ext2_inode *inode, int fd, __u32 index);
+
 // print a given block recursively
 __u32 print_block_recursive(struct ext2_inode *inode, __u32 inode_index, int fd, int depth, __u32 *logical_block_offset, __u32 physical_offset);
 
