@@ -17,7 +17,7 @@ int main(int argc, char** argv) {
     if(process_command_line(argc, argv, &flags, &device) == -1) exit(1);
 
     // initialize devices
-    if(initialize_sensors(&device) == -1) exit(2);
+    if(initialize_sensors(&device) == -1) exit(1);
        
     // loop to print, get commands, check button
     while(flags.run_flag) {

@@ -4,10 +4,14 @@
 #include "../constants.h"
 #include <time.h>
 
-#include "debug.h"
+#define DEBUG_FLAG
 
-//#include <mraa/gpio.h>
-//#include <mraa/aio.h>
+#ifdef DEBUG_FLAG
+#include "debug.h"
+#else
+#include <mraa/gpio.h>
+#include <mraa/aio.h>
+#endif
 
 // struct to allow flags to be passed neatly
 typedef struct flag_struct {
@@ -43,10 +47,10 @@ extern void close_sensors(device *device);
 // gets the time and checks it against period for print
 int get_time(char *time_string, time_t *now);
 //// get time, check if it has been period, and report if it has
-void try_to_report(flags flags, device *device, char *time_string, time_t *then);
+int try_to_report(flags flags, device *device, char *time_string, time_t *then);
 // process command line arguments
 int process_command_line(int argc, char **argv, flags *flags, device *device);
 // process a command through the next '\n'
-bool process_command(flags *flags, device *device);
+int process_command(flags *flags, device *device);
 
 #endif /* lab4b_h */

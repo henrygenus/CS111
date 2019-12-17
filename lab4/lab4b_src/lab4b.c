@@ -13,8 +13,6 @@
 
 #define GPIO_INDEX 60
 #define AIO_INDEX 1
-#define B 4275
-#define R0 100000.0
 
 static struct option longopts[] = {
     { "log",    required_argument, NULL, LOG    },
@@ -28,7 +26,7 @@ static struct option longopts[] = {
 // convert the temperature reading to celsius/fahrenheit
 inline float convert_temperature_reading(int reading, int celsius_flag);
 // get the current temperature
-inline void get_temp(char* temp_string, mraa_aio_context thermometer, int celsius_flag);
+inline int get_temp(char* temp_string, mraa_aio_context thermometer, int celsius_flag);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////// FUNCTION IMPLEMENTATIONS ///////////////////////////////////////////////////////
@@ -37,18 +35,10 @@ inline void get_temp(char* temp_string, mraa_aio_context thermometer, int celsiu
 int check_button(mraa_gpio_context button) { return mraa_gpio_read(button); }
 
 int initialize_sensors(device *device) {
-    device->button = mraa_gpio_init(GPIO_INDEX);
-    device->thermometer = mraa_aio_init(AIO_INDEX);
-    mraa_gpio_dir(device->button, MRAA_GPIO_IN);
-    if (!device->thermometer) {
-        fprintf(stderr, "Could not initialize temperature sensor--%s\n", strerror(errno));
-        return -1;
-    }
-    if (!device->button) {
-        fprintf(stderr, "Could not initialize button--%s\n", strerror(errno));
-        return -1;
-    }
-    else return 0;
+    if (!(device->thermometer = mraa_aio_init(AIO_INDEX))) return SYS_ERROR;
+				if (!(device->button = mraa_gpio_init(GPIO_INDEX))) return SYS_ERROR;
+				mraa_gpio_dir(device->button, MRAA_GPIO_IN);
+				return 0;
 }
 
 void close_sensors(device *device) {
@@ -58,20 +48,23 @@ void close_sensors(device *device) {
 
 int get_time(char *time_string, time_t *now) {
     struct timespec tspec;
-    if (clock_gettime(CLOCK_REALTIME, &tspec) == -1)
-        {fprintf(stderr, "%s\n", strerror(errno)); exit(1);}
-    *now = tspec.tv_sec;
+				if (clock_gettime(CLOCK_REALTIME, &tspec) == -1) return SYS_ERROR;
+				*now = tspec.tv_sec;
     struct tm ts = *localtime(now);
-    if (sprintf(time_string, "%02d:%02d:%02d", ts.tm_hour, ts.tm_min, ts.tm_sec) == -1) exit(1);
+    if (sprintf(time_string, "%02d:%02d:%02d",
+																ts.tm_hour, ts.tm_min, ts.tm_sec) == -1) return SYS_ERROR;
     //strftime(time_string, sizeof(time_string), "%H:%M:%S", &ts);
-    if (strlen(time_string) != 8) {fprintf(stderr, "Invalid time string\n"); return -1;}
+    if (strlen(time_string) != 8) {
+								fprintf(stderr, "Invalid time string\n");
+								return -1;
+				}
     return 0;
 }
 
-void try_to_report(flags flags, device *device, char *time_string, time_t *then) {
+int try_to_report(flags flags, device *device, char *time_string, time_t *then) {
     time_t now = 0; char temp_string[27];
     // check if it has been (period) seconds
-    if(get_time(time_string, &now) == -1) exit(1);
+    if(get_time(time_string, &now) == -1) return SYS_ERROR;
     if(now - *then >= device->period) {
         *then = now;
         get_temp(temp_string, device->thermometer, flags.celsius_flag);
@@ -79,22 +72,16 @@ void try_to_report(flags flags, device *device, char *time_string, time_t *then)
         //do write
         if (flags.log_flag)
             if(dprintf(device->log, "%s %s\n", time_string, temp_string) == -1)
-                {
-                    fprintf(stderr, "%s\n", strerror(errno));
-                    exit(1);
-                }
+																return SYS_ERROR;
         if (fprintf(stdout, "%s %s\n", time_string, temp_string) == -1)
-        {
-            fprintf(stderr, "%s\n", strerror(errno));
-            exit(1);
-        }
+												return SYS_ERROR;
         fflush(stdout);
     }
+				return 0;
 }
 
 int process_command_line(int argc, char** argv, flags *flags, device *device){
     int opt, longindex = 0;
-
     while (true) {
         if ((opt = getopt_long(argc, argv, "", longopts, &longindex)) == -1) break;
         switch(opt) {
@@ -103,16 +90,16 @@ int process_command_line(int argc, char** argv, flags *flags, device *device){
             case LOG:
                 flags->log_flag = true;
                 if((device->log = open(optarg, LOGFILE_FLAGS, PERMISSIONS)) == -1)
-                    {fprintf(stderr, "%s\n", strerror(errno)); exit(1);};
+																				return SYS_ERROR;
                 break;
-            default: exit(1);
+												default: return SYS_ERROR;
         }
     }
     return 0;
 }
 
 // string length overflow prevention is placed on the programmer
-bool process_command(flags *flags, device *device) {
+int process_command(flags *flags, device *device) {
     char buffer[BUFSIZ] = {0};
     char command[BUFSIZ] = {0};
     int ctr= 0, iter = 0;
@@ -123,25 +110,23 @@ bool process_command(flags *flags, device *device) {
     
     // print command into log
     if (flags->log_flag && dprintf(device->log, "%s", buffer) == -1)
-        {fprintf(stderr, "%s\n", strerror(errno)); exit(1);}
+								return SYS_ERROR;
                
     // put each word into pointer with null byte instead of newline or space
     for(iter = 0; ctr < BUFSIZ; ctr++, iter++) {
         if(buffer[ctr] == '\n' || buffer[ctr] == '\0') break;
         command[iter] = buffer[ctr];
-    }
-    command[iter] = '\0';
-    ctr++;
+    } command[iter] = '\0';
     
     // deal with command
     if (strcmp(command, "OFF") == 0) flags->run_flag = false;
     else if (strcmp(command, "START") == 0) flags->report_flag = true;
     else if (strcmp(command, "STOP") == 0) flags->report_flag = false;
     else if (subcmp(command, "PERIOD=", 7)) device->period = atoi(&command[7]);
-    else if (subcmp(command, "SCALE=", 6)) flags->celsius_flag =(command[6] == 'C');
+    else if (subcmp(command, "SCALE=", 6)) flags->celsius_flag = (command[6] == 'C');
     else if (subcmp(command, "LOG", 3)) ;
     //{ if(!flags->log_flag) if(fprintf(stdout, "%s", buffer) == -1) exit(1); }
-    else { fprintf(stderr, "Bad Command: %s\n", command); exit(1);};
+				else { fprintf(stderr, "Bad Command: %s\n", command); return -1; }
     
     return true;
 }
@@ -170,10 +155,13 @@ float convert_temperature_reading(int reading, int celsius_flag)
 }
 
 // get the current temperature
-void get_temp(char* temp_string, mraa_aio_context thermometer, int celsius_flag) {
-    if(sprintf(temp_string, "%0.1f",
-            convert_temperature_reading(mraa_aio_read(thermometer), celsius_flag)) == -1) {
-        fprintf(stderr, "Could not resolve temperature\n");
-        exit(1);
-    }
+int get_temp(char* temp_string, mraa_aio_context thermometer, int celsius_flag) {
+    if(sprintf(temp_string, "%0.1f", convert_temperature_reading(mraa_aio_read(thermometer), celsius_flag)) == -1)
+								return SYS_ERROR;
+				return 0;
+}
+
+int _system_call_error_(char *arg) {
+				perror(arg);
+				return -1;
 }
