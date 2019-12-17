@@ -27,7 +27,8 @@ int client_connect(char * host_name, unsigned int port);
 SSL_CTX *ssl_init(void);
 // bind a socket to a tls context
 SSL *attach_ssl_to_socket(int socket, SSL_CTX *context);
-
+// check condition for stopping output reading (varies if server vs device)
+inline bool last_entry(pid_t device, char *buffer);
 
 // ////////////////////////////////////////////////////////////////////////
 // ////////////////////// FUNCTION IMPLEMENTATIONS ////////////////////////
@@ -50,7 +51,7 @@ int process_command_line(int argc, char** argv, tcp *tcp, char **args) {
             case LOG:
 																if ((tcp->logfile = strdup(optarg)) == NULL) return SYS_ERROR;
             case SCALE: case PERIOD:
-                if (sprintf(buffer, "%s", argv[optind-1]) == -1) return SYS_ERROR;
+                if (sprintf(buffer, "%s", argv[optind-1]) < 0) return SYS_ERROR;
                 args[++max_ind] = strdup(buffer);
                 break;
 												default: return -1;

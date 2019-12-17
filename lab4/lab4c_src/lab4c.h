@@ -42,8 +42,6 @@ int srv_connect(tcp tcp, bool tls_flag, int *server, SSL_CTX *context, SSL *clie
 extern int process_command_line(int argc, char **argv, tcp *tcp, char **args);
 // checks options initialized by command line (pipes initialized here)
 extern int check_options(tcp *tcp);
-// check condition for stopping output reading (varies if server vs device)
-bool last_entry(pid_t device, char *buffer);
 // loop to get input from infd and write to outfd
 void process_output(port *from, port *to, int device_flag);
 // read or tls read depending on port type
