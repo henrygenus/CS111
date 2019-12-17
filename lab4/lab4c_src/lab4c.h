@@ -10,6 +10,14 @@
 #define WRITE 1
 #define DEVICE "./lab4b"
 
+#define DEBUG_FLAG
+
+#ifdef DEBUG_FLAG
+#define DEBUG_PRINT 1
+#else
+#define DEBUG_PRINT 0
+#endif
+
 typedef struct port_data {
     SSL *ssl_client;
     int *socket;
@@ -46,4 +54,5 @@ SSL *attach_ssl_to_socket(int socket, SSL_CTX *context);
 extern int do_read(port *port, char *string, int size);
 // write or tls write depending on port type
 extern int do_write(port *port, char *string, int size);
+
 #endif /* lab4c_tcp_h */

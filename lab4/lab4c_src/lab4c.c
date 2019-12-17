@@ -18,9 +18,9 @@ static struct option longopts[] = {
     { 0, 0, 0, 0 }
 };
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////// FUNCTION IMPLEMENTATIONS //////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////
+// ////////////////////// FUNCTION IMPLEMENTATIONS ////////////////////////
+// ////////////////////////////////////////////////////////////////////////
 
 int process_command_line(int argc, char** argv, tcp *tcp, char **args) {
     int longindex = 0, opt = 0, ctr;
@@ -31,21 +31,18 @@ int process_command_line(int argc, char** argv, tcp *tcp, char **args) {
         // interpret arguments
         switch (opt) {
             case ID:
-                if(strcpy(tcp->id, optarg) == NULL) {
-                    fprintf(stderr, "%s\n", strerror(errno)); exit(1); }
+																if (strcpy(tcp->id, optarg) == NULL) return SYS_ERROR;
                 break;
             case HOST:
-                if((tcp->host = strdup(optarg)) == NULL) {
-                    fprintf(stderr, "%s\n", strerror(errno)); exit(1); }
+																if ((tcp->host = strdup(optarg)) == NULL) return SYS_ERROR;
                 break;
             case LOG:
-                if((tcp->logfile = strdup(optarg)) == NULL) {
-                fprintf(stderr, "%s\n", strerror(errno)); exit(1); }
+																if ((tcp->logfile = strdup(optarg)) == NULL) return SYS_ERROR;
             case SCALE: case PERIOD:
-                sprintf(buffer, "%s", argv[optind-1]);
+                if (sprintf(buffer, "%s", argv[optind-1]) == -1) return SYS_ERROR;
                 args[++max_ind] = strdup(buffer);
                 break;
-            default: exit(1);
+												default: return -1;
         }
     }
     args[++max_ind] = NULL;
@@ -59,15 +56,13 @@ int process_command_line(int argc, char** argv, tcp *tcp, char **args) {
         }
         else tcp->portno = atoi(argv[ctr]);
     }
-    /*
-    for (ctr = 0; ctr <= max_ind; ctr++)
-        fprintf(stdout, "%s ", args[ctr]);
-    fprintf(stdout, "\n");
-    fflush(NULL);
-     */
+				if (DEBUG_PRINT) {
+								for (ctr = 0; ctr <= max_ind; ctr++) fprintf(stdout, "%s ", args[ctr]);
+								fprintf(stdout, "\n");
+								fflush(NULL);
+				}
     return max_ind + 1;
 }
-
 
 void process_output(port *from, port *to, int device_flag) {
     char buffer[BUFSIZ] = {0};
@@ -78,7 +73,7 @@ void process_output(port *from, port *to, int device_flag) {
             // write to device
             do_write(to, buffer, count);
             // output for error checking
-            //write(2, buffer, count);
+            if (DEBUG_PRINT) write(2, buffer, count);
         }
     } while (! last_entry(device_flag, buffer));
 }
@@ -97,9 +92,9 @@ void check_options(tcp *tcp, int parent_pipe[2], int child_pipe[2]) {
     else exchange_pipes(parent_pipe, child_pipe);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////// SERVER FUNCTIONS ///////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////
+// //////////////////////// SERVER FUNCTIONS //////////////////////////////
+// ////////////////////////////////////////////////////////////////////////
 
 int client_connect(char *host_name, unsigned int port) {
     //encode the ip address and the port for the remote
@@ -140,9 +135,9 @@ SSL *attach_ssl_to_socket(int socket, SSL_CTX *context) {
 				return sslClient;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////// INLINE FUNCTIONS ////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// ////////////////////////////////////////////////////////////////////////
+// //////////////////////// INLINE FUNCTIONS //////////////////////////////
+// ////////////////////////////////////////////////////////////////////////
 
 int do_read(port *port, char *string, int size) {
     return(port->ssl_client == NULL ? (int)read(*port->socket, string, size)
