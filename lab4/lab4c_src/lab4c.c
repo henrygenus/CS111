@@ -18,26 +18,9 @@ static struct option longopts[] = {
     { 0, 0, 0, 0 }
 };
 
-int client_connect(char *host_name, unsigned int port) {
-    //encode the ip address and the port for the remote
-    struct sockaddr_in serv_addr;
-    int sockfd = socket(AF_INET, SOCK_STREAM, 0);
-    struct hostent *server = NULL;
-    if((server = gethostbyname(host_name)) == NULL)
-        {fprintf(stderr, "%s\n", strerror(errno)); exit(1);};
-   
-    // convert host_name to IP addr
-    memset(&serv_addr, 0, sizeof(struct sockaddr_in));
-    serv_addr.sin_family = AF_INET; //address is Ipv4
-    memcpy(&serv_addr.sin_addr.s_addr, server->h_addr, server->h_length);
-   
-    //copy ip address from server to serv_addr
-    serv_addr.sin_port = htons(port); //setup the port
-    
-    //initiate the connection to server
-    connect(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr));
-    return sockfd;
-}
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////// FUNCTION IMPLEMENTATIONS //////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 int process_command_line(int argc, char** argv, tcp *tcp, char **args) {
     int longindex = 0, opt = 0, ctr;
@@ -97,59 +80,7 @@ void process_output(port *from, port *to, int device_flag) {
             // output for error checking
             //write(2, buffer, count);
         }
-        //count = (from->ssl_client == NULL
-         //        || SSL_pending(from->ssl_client) ? BUFSIZ : 0);
     } while (! last_entry(device_flag, buffer));
-}
-
-int do_read(port *port, char *string, int size) {
-    return(port->ssl_client == NULL ? (int)read(*port->socket, string, size)
-           : SSL_read(port->ssl_client, string, size));
-}
-            
-int do_write(port *port, char *string, int size) {
-    return (port->ssl_client == NULL ? (int)write(*port->socket, string, size)
-            : SSL_write(port->ssl_client, string, size));
-}
-
-bool last_entry(pid_t device, char *buffer) {
-    int ctr = 0;
-    while (buffer[ctr] != ' ') ctr++;
-    return (device ? subcmp(&buffer[++ctr], "SHUTDOWN\n", 9) : subcmp(buffer, "OFF\n", 4));
-}
-
-SSL_CTX *ssl_init(void) {
-    SSL_CTX * newContext = NULL;
-    SSL_library_init();
-    //Initialize the error message
-    SSL_load_error_strings();
-    OpenSSL_add_all_algorithms();
-    //TLS version: v1, one context per server.
-    newContext = SSL_CTX_new(TLSv1_client_method());
-    return newContext;
- }
-
- SSL *attach_ssl_to_socket(int socket, SSL_CTX *context) {
-     SSL *sslClient = SSL_new(context);
-     SSL_set_fd(sslClient, socket);
-     SSL_connect(sslClient);
-     return sslClient;
- }
-
-
-void exchange_pipes(int parent_pipe[2], int child_pipe[2]) {
-    int temp;
-    temp = parent_pipe[READ];
-    parent_pipe[READ] = child_pipe[READ];
-    child_pipe[READ] = temp;
-}
-
-bool subcmp(const char *string1, const char *string2, unsigned int len){
-    unsigned int ctr;
-    if (strlen(string1) < len || strlen(string2) < len) return false;
-    for(ctr = 0; ctr < len; ctr++)
-        if (string1[ctr] != string2[ctr]) return false;
-    return true;
 }
 
 void check_options(tcp *tcp, int parent_pipe[2], int child_pipe[2]) {
@@ -164,4 +95,83 @@ void check_options(tcp *tcp, int parent_pipe[2], int child_pipe[2]) {
     else if (pipe(parent_pipe) == -1 || pipe(child_pipe) == -1)
         { fprintf(stderr, "%s\n", strerror(errno)); exit(1); }
     else exchange_pipes(parent_pipe, child_pipe);
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////// SERVER FUNCTIONS ///////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+int client_connect(char *host_name, unsigned int port) {
+    //encode the ip address and the port for the remote
+    struct sockaddr_in serv_addr;
+    int sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    struct hostent *server = NULL;
+    if((server = gethostbyname(host_name)) == NULL)
+        {fprintf(stderr, "%s\n", strerror(errno)); exit(1);};
+   
+    // convert host_name to IP addr
+    memset(&serv_addr, 0, sizeof(struct sockaddr_in));
+    serv_addr.sin_family = AF_INET; //address is Ipv4
+    memcpy(&serv_addr.sin_addr.s_addr, server->h_addr, server->h_length);
+   
+    //copy ip address from server to serv_addr
+    serv_addr.sin_port = htons(port); //setup the port
+    
+    //initiate the connection to server
+    connect(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr));
+    return sockfd;
+}
+
+SSL_CTX *ssl_init(void) {
+			SSL_CTX * newContext = NULL;
+			SSL_library_init();
+			//Initialize the error message
+			SSL_load_error_strings();
+			OpenSSL_add_all_algorithms();
+			//TLS version: v1, one context per server.
+			newContext = SSL_CTX_new(TLSv1_client_method());
+			return newContext;
+}
+
+SSL *attach_ssl_to_socket(int socket, SSL_CTX *context) {
+				SSL *sslClient = SSL_new(context);
+				SSL_set_fd(sslClient, socket);
+				SSL_connect(sslClient);
+				return sslClient;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////// INLINE FUNCTIONS ////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+int do_read(port *port, char *string, int size) {
+    return(port->ssl_client == NULL ? (int)read(*port->socket, string, size)
+           : SSL_read(port->ssl_client, string, size));
+}
+            
+int do_write(port *port, char *string, int size) {
+    return (port->ssl_client == NULL ? (int)write(*port->socket, string, size)
+            : SSL_write(port->ssl_client, string, size));
+}
+
+bool last_entry(pid_t device, char *buffer) {
+    int ctr = 0;
+    while (buffer[ctr] != ' ') ctr++;
+    return (device ? subcmp(&buffer[++ctr], "SHUTDOWN\n", 9)
+												: subcmp(buffer, "OFF\n", 4));
+}
+
+void exchange_pipes(int parent_pipe[2], int child_pipe[2]) {
+    int temp;
+    temp = parent_pipe[READ];
+    parent_pipe[READ] = child_pipe[READ];
+    child_pipe[READ] = temp;
+}
+
+bool subcmp(const char *string1, const char *string2, unsigned int len){
+    unsigned int ctr;
+    if (strlen(string1) < len || strlen(string2) < len) return false;
+    for(ctr = 0; ctr < len; ctr++)
+        if (string1[ctr] != string2[ctr]) return false;
+    return true;
 }
