@@ -36,6 +36,7 @@ __u32 resolve_address(__u32 absolute_block_id);
 // test if a given block in a bitmap is free
 __u8 is_used(int block_num, __u8 *bitmap);
 
+
 /*
  * ext2 structure printing functions
  */
