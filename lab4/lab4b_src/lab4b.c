@@ -32,36 +32,6 @@ inline int get_temp(char* temp_string, mraa_aio_context thermometer, int celsius
 //////////////////////////////////////////////////// FUNCTION IMPLEMENTATIONS ///////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-int check_button(mraa_gpio_context button) { return mraa_gpio_read(button); }
-
-void do_when_pushed(void *run_flag) {
-				*(int*)run_flag = false;
-}
-
-int initialize_sensors(device *device, bool *run_flag) {
-    if (!(device->thermometer = mraa_aio_init(AIO_INDEX))) return SYS_ERROR;
-				if (!(device->button = mraa_gpio_init(GPIO_INDEX))) return SYS_ERROR;
-				mraa_gpio_dir(device->button, MRAA_GPIO_IN);
-				mraa_gpio_isr(device->button, MRAA_GPIO_EDGE_RISING, do_when_pushed, (void*)run_flag);
-				return 0;
-}
-
-void close_sensors(device *device) {
-    mraa_gpio_close(device->button);
-    mraa_aio_close(device->thermometer);
-}
-
-int get_time(char *time_string, time_t *now) {
-    struct timespec tspec;
-				if (clock_gettime(CLOCK_REALTIME, &tspec) == -1) return SYS_ERROR;
-				*now = tspec.tv_sec;
-    struct tm ts = *localtime(now);
-    if (sprintf(time_string, "%02d:%02d:%02d",
-																ts.tm_hour, ts.tm_min, ts.tm_sec) == -1) return SYS_ERROR;
-    //strftime(time_string, sizeof(time_string), "%H:%M:%S", &ts);
-    return 0;
-}
-
 int try_to_report(flags flags, device *device, char *time_string, time_t *then) {
     time_t now = 0; char temp_string[27];
     // check if it has been (period) seconds
@@ -97,7 +67,17 @@ int process_command_line(int argc, char** argv, flags *flags, device *device){
 												default: return SYS_ERROR;
         }
     }
+				if (fcntl(0, F_SETFL, O_NONBLOCK | fcntl(0, F_GETFL)) == -1) exit(SYS_ERROR);
     return 0;
+}
+
+int print_shutdown(char *time_string, bool log_flag, int log){
+    // print exit command
+    if (fprintf(stdout, "%s SHUTDOWN\n", time_string) == -1)
+								return SYS_ERROR;
+    else if (log_flag && dprintf(log, "%s SHUTDOWN\n", time_string) == -1)
+								return SYS_ERROR;
+				else return 0;
 }
 
 // string length overflow prevention is placed on the programmer
@@ -108,7 +88,7 @@ int process_command(flags *flags, device *device) {
     
     // get a command
     fgets(buffer, BUFSIZ, stdin);
-    if(strlen(buffer) == 0) return false;
+    if(strlen(buffer) == 0) return 0;
     
     // print command into log
     if (flags->log_flag && dprintf(device->log, "%s", buffer) == -1)
@@ -130,7 +110,41 @@ int process_command(flags *flags, device *device) {
     //{ if(!flags->log_flag) if(fprintf(stdout, "%s", buffer) == -1) exit(1); }
 				else { fprintf(stderr, "Bad Command: %s\n", command); return -1; }
     
-    return true;
+    return 0;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////// SENSOR FUNCTIONS ///////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+int check_button(mraa_gpio_context button) { return mraa_gpio_read(button); }
+
+void do_when_pushed(void *run_flag) {
+				*(int*)run_flag = false;
+}
+
+int initialize_sensors(device *device, bool *run_flag) {
+    if (!(device->thermometer = mraa_aio_init(AIO_INDEX))) return SYS_ERROR;
+				if (!(device->button = mraa_gpio_init(GPIO_INDEX))) return SYS_ERROR;
+				mraa_gpio_dir(device->button, MRAA_GPIO_IN);
+				mraa_gpio_isr(device->button, MRAA_GPIO_EDGE_RISING, do_when_pushed, (void*)run_flag);
+				return 0;
+}
+
+void close_sensors(device *device) {
+    mraa_gpio_close(device->button);
+    mraa_aio_close(device->thermometer);
+}
+
+int get_time(char *time_string, time_t *now) {
+    struct timespec tspec;
+				if (clock_gettime(CLOCK_REALTIME, &tspec) == -1) return SYS_ERROR;
+				*now = tspec.tv_sec;
+    struct tm ts = *localtime(now);
+    if (sprintf(time_string, "%02d:%02d:%02d",
+																ts.tm_hour, ts.tm_min, ts.tm_sec) == -1) return SYS_ERROR;
+    //strftime(time_string, sizeof(time_string), "%H:%M:%S", &ts);
+    return 0;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

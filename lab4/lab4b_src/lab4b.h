@@ -53,6 +53,9 @@ int get_time(char *time_string, time_t *now);
 // get time, check if it has been period, and report if it has
 int try_to_report(flags flags, device *device, char *time_string, time_t *then);
 
+// print final shutdown command
+int print_shutdown(char *time_string, bool log_flag, int log);
+
 // process command line arguments
 int process_command_line(int argc, char **argv, flags *flags, device *device);
 
