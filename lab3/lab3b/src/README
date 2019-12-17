@@ -1,0 +1,21 @@
+NAME: Henry Genus
+EMAIL: hgenus@g.ucla.edu
+ID: 304965058
+
+
+FILE SUMMARY:
+
+    Makefile:       A Makefile with targets "default", "dist", and "clean"
+    lab3b.py:       The main function testing the internal consistency of a .csv summary of a file system
+    Block.py:       The implementation of the "Block" class used to keep track of block consistency
+    Inode.py:       The implementation of the "Inode" class used to keep track of inode consistency
+    constants.py:   A file which defines various constants for cleaner and more readable code
+
+
+All .py modules involved in this program are written in python.  As is such, the default target for the Makefile \
+    only creates a symbolic link to the file containing the main routine
+
+
+FUTURE DEVELOPMENT:
+    With very few tweaks, this program could be modified to check duplicate or invalid inodes, as well as multiple \
+        file systems and/or groups at once.
