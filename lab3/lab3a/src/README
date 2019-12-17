@@ -2,6 +2,9 @@ NAME: Henry Genus
 EMAIL: hgenus@g.ucla.edu
 ID: 304965058
 
+This program analyzes the contents of a filesystem represented by an IMG file.
+
+PACKAGE CONTENTS:
 Makefile: 	A Makefile to build and run the deliverable program
 main.c:		The operating code to print a file system contents
 lab3.h:		Declarations of utility functions
