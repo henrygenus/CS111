@@ -12,7 +12,8 @@ FILE SUMMARY:
                     block consistency
     Inode.py:       The implementation of the "Inode" class used to keep track of
                     inode consistency
-    constants.py:   A file which defines various constants for cleaner and more readable code
+    constants.py:   A file which defines various constants for cleaner and more
+                    readable code
 
 
 All .py modules involved in this program are written in python.  As is such, the default
