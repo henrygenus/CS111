@@ -40,16 +40,22 @@ typedef struct device_struct {
 
 // read from button for exit
 extern int check_button(mraa_gpio_context button);
+
 // call aio_init and gpio_init on appropriate devices
-extern int initialize_sensors(device *device);
+extern int initialize_sensors(device *device, bool *run_flag);
+
 // call aio_close and gpio_close on appropriate devices
 extern void close_sensors(device *device);
+
 // gets the time and checks it against period for print
 int get_time(char *time_string, time_t *now);
-//// get time, check if it has been period, and report if it has
+
+// get time, check if it has been period, and report if it has
 int try_to_report(flags flags, device *device, char *time_string, time_t *then);
+
 // process command line arguments
 int process_command_line(int argc, char **argv, flags *flags, device *device);
+
 // process a command through the next '\n'
 int process_command(flags *flags, device *device);
 

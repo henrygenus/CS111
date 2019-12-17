@@ -34,10 +34,15 @@ inline int get_temp(char* temp_string, mraa_aio_context thermometer, int celsius
 
 int check_button(mraa_gpio_context button) { return mraa_gpio_read(button); }
 
-int initialize_sensors(device *device) {
+void do_when_pushed(void *run_flag) {
+				*(int*)run_flag = false;
+}
+
+int initialize_sensors(device *device, bool *run_flag) {
     if (!(device->thermometer = mraa_aio_init(AIO_INDEX))) return SYS_ERROR;
 				if (!(device->button = mraa_gpio_init(GPIO_INDEX))) return SYS_ERROR;
 				mraa_gpio_dir(device->button, MRAA_GPIO_IN);
+				mraa_gpio_isr(device->button, MRAA_GPIO_EDGE_RISING, do_when_pushed, (void*)run_flag);
 				return 0;
 }
 
@@ -54,10 +59,6 @@ int get_time(char *time_string, time_t *now) {
     if (sprintf(time_string, "%02d:%02d:%02d",
 																ts.tm_hour, ts.tm_min, ts.tm_sec) == -1) return SYS_ERROR;
     //strftime(time_string, sizeof(time_string), "%H:%M:%S", &ts);
-    if (strlen(time_string) != 8) {
-								fprintf(stderr, "Invalid time string\n");
-								return -1;
-				}
     return 0;
 }
 
@@ -67,7 +68,8 @@ int try_to_report(flags flags, device *device, char *time_string, time_t *then) 
     if(get_time(time_string, &now) == -1) return SYS_ERROR;
     if(now - *then >= device->period) {
         *then = now;
-        get_temp(temp_string, device->thermometer, flags.celsius_flag);
+        if (get_temp(temp_string, device->thermometer, flags.celsius_flag) == -1)
+												return -1;
         
         //do write
         if (flags.log_flag)
