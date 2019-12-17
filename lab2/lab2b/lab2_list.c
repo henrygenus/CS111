@@ -92,7 +92,7 @@ int main(int argc, char** argv) {
   
   // allocate space 
   if (!(threads = (pthread_t*)malloc(nthreads*sizeof(pthread_t)))) exit(SYS_ERROR);
-  if (!(info = (struct list_info*)malloc(nthreads*sizeof(struct list_info)))) EXIT(SYS_ERROR);
+  if (!(info = (struct list_info*)malloc(nthreads*sizeof(struct list_info)))) exit(SYS_ERROR);
 
   if (!(keys = (char**)malloc(nelements*sizeof(char*)))) exit(SYS_ERROR);
   if (!(times = (long long*)malloc(nelements*sizeof(long long)))) exit(SYS_ERROR);

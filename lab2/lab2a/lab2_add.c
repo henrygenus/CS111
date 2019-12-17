@@ -17,19 +17,24 @@ inline void unlock(lock_info *lock, char lock_type);
 
 
 int main(int argc, char** argv) {
-  int opt, longindex, ctr, noperations, ret = 0, nthreads = 1, niterations = -1, spin_lock = 0;
+  int opt, longindex, ctr, noperations, ret = 0, nthreads, niterations = -1, spin_lock = 0;
   char test[MAX_TEST_LENGTH] = "add", lock_type[6] = "-none";
   struct timespec* start_time = &(struct timespec){0,0};
   struct timespec* end_time = &(struct timespec){0,0};
   struct add_info structure;
   long long counter = 0; long time;
-  pthread_t* threads; 
+  pthread_t *threads; 
   pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER; 
   lock_info lock_union; 
 
   // get thread and iteration number
   while(1) {
     if ((opt = getopt_long(argc, argv, "", longopts, &longindex)) == -1) break;
+
+    // optional: print commands while executing
+    for (ctr = 0; ctr < argc; ctr++) fprintf(stderr, "%s ", argv[ctr]);
+    fprintf(stderr, "\n");
+  
     switch(opt) {
     case THREADS:
       nthreads = (optarg == NULL ? 1 : string_to_int(optarg));
@@ -55,11 +60,14 @@ int main(int argc, char** argv) {
   // check thread and iteration numbers
   if (nthreads <= 0) error_int("Invalid Thread Number", nthreads, 1);
   else if (niterations < 0) error_int("Invalid Iteration Number", niterations, 1);
+  else noperations = nthreads*niterations*2;
 
   // get test string and lock ready
   if (opt_yield) strcat(test, "-yield");
   strcat(test, lock_type);
 
+  fprintf(stderr, "PRE");
+  
   //get pre-action time
   if(clock_gettime(CLOCK_REALTIME, start_time) == -1) exit(SYS_ERROR);
 
@@ -78,11 +86,11 @@ int main(int argc, char** argv) {
   if(clock_gettime(CLOCK_REALTIME, end_time) == -1) exit(SYS_ERROR);
   time = (end_time->tv_sec - start_time->tv_sec)*1000000000
     + (end_time->tv_nsec - start_time->tv_nsec);
-  noperations = nthreads*niterations*2;
 
   // output and exit
   fprintf(stdout, "%s,%i,%i,%i,%li,%li,%lli\n", test,
-	  nthreads, niterations, noperations, time, time/(long)noperations, counter);
+	  nthreads, niterations, noperations,
+	  time, time/(long)noperations, counter);
   if(threads != NULL) free(threads);
   exit(ret);
 }
@@ -130,5 +138,3 @@ void unlock(lock_info *lock, char lock_type) {
   if (lock_type == 'm') pthread_mutex_unlock(lock->mlock);
   else if (lock_type == 's') __sync_lock_release(lock->slock);
 }
-
-

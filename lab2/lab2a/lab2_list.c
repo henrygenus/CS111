@@ -49,11 +49,11 @@ int main(int argc, char** argv) {
   char **keys; int *indeces; pthread_t *threads;
   SortedListElement_t **elements; struct list_info *info; 
   // optional: print commands while executing
-  /*
+  
   for (ctr = 0; ctr < argc; ctr++)
     fprintf(stderr, "%s ", argv[ctr]);
   fprintf(stderr, "\n");
-  */
+ 
   opt_yield = 0;
   while(1) {
     if ((opt = getopt_long(argc, argv, "", longopts, &longindex)) == -1) break;

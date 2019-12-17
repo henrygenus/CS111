@@ -28,7 +28,7 @@
 #define SPIN_LOCK 's'
 #define MUTEX_LOCK 'm'
 #define OPS_PER_ITERATION 3
-#define SYS_ERROR system_call_error
+#define SYS_ERROR system_call_error()
 
 static struct option longopts[] = {
   { .name = "threads",     .has_arg = optional_argument,  .flag = NULL,  .val = THREADS    },
@@ -43,7 +43,7 @@ static struct option longopts[] = {
 
 // handler for child thread seg faults
 void handler(int sig) {
-  write(STDERR_FILENO, "ERROR", "Segmentation Fault.", 28);
+  write(STDERR_FILENO, "ERROR: Segmentation Fault.", 28);
   _exit(sig == 2 ? sig : 2);
 }
 

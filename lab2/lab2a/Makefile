@@ -1,5 +1,3 @@
-#!/bin/bash
-
 all: lab2_add lab2_list
 
 build: lab2_add lab2_list
@@ -8,10 +6,10 @@ tests: lab2_add lab2_list
 	(make addtest && make listtest && echo 0 > /dev/null) || (echo 1 > /dev/null)
 
 addtest: lab2_add
-	./add_script > lab2_add.csv 2> /dev/null
+	./add_script > lab2_add.csv
 
 listtest: lab2_list
-	./list_script > lab2_list.csv 2> /dev/null
+	./list_script > lab2_list.csv 
 
 graphs: tests
 	/usr/local/cs/bin/gnuplot ./lab2_add.gp
