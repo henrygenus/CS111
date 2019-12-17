@@ -21,7 +21,7 @@ int main(int argc, char **argv) {
     size_t ctr = strlen(argv[0]);
     while(argv[0][ctr] != '/' && ctr != 0) ctr--;
     int tls_flag = (strcmp(&argv[0][++ctr], "lab4c_tls") == 0);
-    //fprintf(stderr, "%i", tls_flag);
+    if (DEBUG_PRINT) fprintf(stderr, "%i", tls_flag);
         
     // initialize connection with server
     process_command_line(argc, argv, &tcp, args);
@@ -37,24 +37,24 @@ int main(int argc, char **argv) {
         ssl_client = attach_ssl_to_socket(server, context);
     }
     
-    //fprintf(stderr, "Parent Process PID: %i\n", getpid());
+    if (DEBUG_PRINT) fprintf(stderr, "Parent Process PID: %i\n", getpid());
     
     // ////////////////////// child: device /////////////////////
     // runs lab4b program with writes to log
     if ((device_pid = fork()) == 0) {
-        //fprintf(stderr, "DEV PREPPING (%i)\n", getpid());
+        if (DEBUG_PRINT) fprintf(stderr, "DEV PREPPING (%i)\n", getpid());
         // close other pipes
         close(parent_pipe[WRITE]);
         close(parent_pipe[READ]);
         // setup environment
         dup2(child_pipe[READ], READ);
         dup2(child_pipe[WRITE], WRITE);
-        //fprintf(stderr, "DEV STARTING\n");
+        if (DEBUG_PRINT) fprintf(stderr, "DEV STARTING\n");
         // activate device
         execvp(DEVICE, args);
      
         // if we reach here, there was an error
-        fprintf(stderr, "%s\n", strerror(errno));
+								perror(NULL);
         exit(1);
     }
     // fork failure
@@ -69,7 +69,7 @@ int main(int argc, char **argv) {
     
     // server -> device
     if ((srv_to_dev = fork()) == 0) {
-        //fprintf(stderr, "SRV->DEV PREPPING (%i)\n", getpid());
+        if (DEBUG_PRINT) fprintf(stderr, "SRV->DEV PREPPING (%i)\n", getpid());
         // close other pipes
         close(parent_pipe[READ]);
         close(child_pipe[READ]);
@@ -80,9 +80,9 @@ int main(int argc, char **argv) {
         out.socket = &parent_pipe[WRITE];
         out.ssl_client = NULL;
         // loop read
-        //fprintf(stderr, "SRV->DEV STARTING\n");
+        if (DEBUG_PRINT) fprintf(stderr, "SRV->DEV STARTING\n");
         process_output(&in, &out, 0);
-        //fprintf(stderr, "SRV->DEV FINISHED\n");
+        if (DEBUG_PRINT) fprintf(stderr, "SRV->DEV FINISHED\n");
         // cleanup
         close(server);
         close(parent_pipe[WRITE]);
@@ -96,7 +96,7 @@ int main(int argc, char **argv) {
 
     // device -> server
     else if ((dev_to_srv = fork()) == 0) {
-        //fprintf(stderr, "DEV->SRV PREPPING (%i)\n", getpid());
+        if (DEBUG_PRINT) fprintf(stderr, "DEV->SRV PREPPING (%i)\n", getpid());
         // close other pipes
         close(parent_pipe[WRITE]);
         close(child_pipe[READ]);
@@ -107,12 +107,12 @@ int main(int argc, char **argv) {
         out.socket = &server;
         out.ssl_client = ssl_client;
         // initiate command delivery
-        //fprintf(stderr, "DEV->SRV STARTING\n");
+        if (DEBUG_PRINT) fprintf(stderr, "DEV->SRV STARTING\n");
         do_write(&out, "ID=304965058\n", 13);
-        //fprintf(stderr, "ID=%s\n", tcp.id);
+        if (DEBUG_PRINT) fprintf(stderr, "ID=%s\n", tcp.id);
         // loop read
         process_output(&in, &out, device_pid);
-        //fprintf(stderr, "DEV->SRV FINISHING\n");
+        if (DEBUG_PRINT) fprintf(stderr, "DEV->SRV FINISHING\n");
         // cleanup
         close(server);
         close(parent_pipe[READ]);
@@ -127,7 +127,8 @@ int main(int argc, char **argv) {
     
     // check return statuses
     while((pid = wait(&wstatus)) != -1) {
-        //fprintf(stderr, "%i exit status %d\n", pid, WEXITSTATUS(wstatus));
+        if (DEBUG_PRINT)
+												fprintf(stderr, "%i exit status %d\n", pid, WEXITSTATUS(wstatus));
         if (WEXITSTATUS(wstatus) > ret) ret = WEXITSTATUS(wstatus);
     }
 
