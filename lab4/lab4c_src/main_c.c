@@ -1,10 +1,9 @@
 #include "lab4c.h"
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <errno.h>
-#include <sys/types.h> // wait
-#include <sys/wait.h> // wait
+#include <stdlib.h> /* exit() */
+#include <stdio.h> /* print() */
+#include <string.h> /* strdup(), strcmp(), strlen() */
+#include <sys/types.h> /* WEXITSTATUS() */
+#include <sys/wait.h> /* wait() */
 
 static inline int try_to_fork(int *pid) {
 				if ((*pid = fork()) == -1) return SYS_ERROR;

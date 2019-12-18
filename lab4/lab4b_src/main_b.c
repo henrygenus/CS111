@@ -1,9 +1,6 @@
 #include "lab4b.h"
-#include <poll.h> // for poll
-#include <stdlib.h> // exit
-#include <errno.h> //errno
-#include <string.h> //strerror
-#include <stdio.h> // BUFSIZ, print fcns
+#include <stdlib.h> /* exit() */
+#include <stdio.h> /* BUFSIZ, print() */
 
 
 int main(int argc, char** argv) {

@@ -2,9 +2,9 @@
 #define lab4c_tcp_h
 
 #include "../constants.h"
-#include <stdbool.h>
-#include <openssl/ssl.h>
-#include <openssl/conf.h>
+#include <stdbool.h> /* bool, true, false */
+#include <openssl/ssl.h>  /* SSL, SSL_CTX, various fcns */
+#include <openssl/conf.h>  /* SSL, SSL_CTX, various fcns */
 
 #define READ 0
 #define WRITE 1

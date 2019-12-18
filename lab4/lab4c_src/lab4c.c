@@ -1,13 +1,8 @@
 #include "lab4c.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <errno.h>
-#include <sys/socket.h>
-#include <netdb.h>
-#include <netinet/in.h>
-#include <netinet/tcp.h>
-
+#include <stdio.h> /* print(), write() */
+#include <sys/socket.h> /* socket() */
+#include <netdb.h> /* struct hostent */
+#include <netinet/in.h> /* struct sockaddr_in, hostent */
 
 static struct option longopts[] = {
     { "log",    required_argument, NULL, LOG    },
@@ -27,8 +22,6 @@ int client_connect(char * host_name, unsigned int port);
 SSL_CTX *ssl_init(void);
 // bind a socket to a tls context
 SSL *attach_ssl_to_socket(int socket, SSL_CTX *context);
-// check condition for stopping output reading (varies if server vs device)
-inline bool last_entry(pid_t device, char *buffer);
 // read or tls read depending on port type
 inline int do_read(port *port, char *string, int size);
 
@@ -179,13 +172,6 @@ int do_read(port *port, char *string, int size) {
 int do_write(port *port, char *string, int size) {
     return (port->ssl_client == NULL ? (int)write(*port->socket, string, size)
             : SSL_write(port->ssl_client, string, size));
-}
-
-bool last_entry(pid_t device, char *buffer) {
-    int ctr = 0;
-    while (buffer[ctr] != ' ') ctr++;
-    return (device ? subcmp(&buffer[++ctr], "SHUTDOWN\n", 9)
-												: subcmp(buffer, "OFF\n", 4));
 }
 
 void exchange_pipes(int parent_pipe[2], int child_pipe[2]) {

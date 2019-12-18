@@ -1,14 +1,13 @@
 #include "lab4b.h"
 #include <time.h>
-#include <math.h> // log
-#include <string.h> // strerror, strcmp, strlen
-#include <stdio.h> // print functions
-#include <stdlib.h> // exit
-#include <sys/stat.h> // file permissions
-#include <fcntl.h> // open
-#include <getopt.h> // getopt function
-#include <unistd.h> // longopts structure
-#include <errno.h> // errno
+#include <math.h> /* log() */
+#include <string.h> /* strcmp, strlen */
+#include <stdlib.h> /* atoi() */
+#include <stdio.h> /* print() */
+#include <sys/stat.h> /* file permissions */
+#include <fcntl.h> /* open() */
+#include <getopt.h> /* getopt() */
+#include <unistd.h> /* longopts */
 
 
 #define GPIO_INDEX 60
@@ -47,7 +46,7 @@ int process_command_line(int argc, char** argv, flags *flags, device *device){
 												default: return SYS_ERROR;
         }
     }
-				if (fcntl(0, F_SETFL, O_NONBLOCK | fcntl(0, F_GETFL)) == -1) exit(SYS_ERROR);
+				if (fcntl(0, F_SETFL, O_NONBLOCK | fcntl(0, F_GETFL)) == -1) return SYS_ERROR;
     return 0;
 }
 
