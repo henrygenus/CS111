@@ -79,18 +79,18 @@ int process_command_line(int argc, char** argv, tcp *tcp, char **args) {
     return max_ind + 1;
 }
 
-void process_output(port *from, port *to, int device_flag) {
+void process_output(port *from, port *to) {
     char buffer[BUFSIZ] = {0};
     int count = BUFSIZ;
     // read command from server
-    do {
-        if((count = do_read(from, buffer, BUFSIZ)) > 0) {
+    while ((count = do_read(from, buffer, BUFSIZ))) {
+        if (count != 0) {
             // write to device
             do_write(to, buffer, count);
             // output for error checking
             if (DEBUG_PRINT) write(2, buffer, count);
         }
-    } while (! last_entry(device_flag, buffer));
+    }
 }
 
 int check_options(tcp *tcp) {
@@ -107,13 +107,13 @@ int check_options(tcp *tcp) {
 // //////////////////////// SERVER FUNCTIONS //////////////////////////////
 // ////////////////////////////////////////////////////////////////////////
 
-int srv_connect(tcp tcp, bool tls_flag, int *server, SSL_CTX *context, SSL *client) {
+int srv_connect(tcp tcp, bool tls_flag, int *server, SSL_CTX **context, SSL **client) {
 				if ((*server = client_connect(tcp.host, tcp.portno)) == -1) return -1;
     
     // initialize tls connection (optional)
     if (tls_flag) {
-								if ((context = ssl_init()) == NULL) return SYS_ERROR;
-        if ((client = attach_ssl_to_socket(*server, context)) == NULL)
+								if ((*context = ssl_init()) == NULL) return SYS_ERROR;
+        if ((*client = attach_ssl_to_socket(*server, *context)) == NULL)
 												return SYS_ERROR;
     }
 				return 0;

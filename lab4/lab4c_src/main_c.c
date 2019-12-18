@@ -34,7 +34,7 @@ int main(int argc, char **argv) {
     else exchange_pipes(parent_pipe, child_pipe);
     
 				// connect with server
-				if (srv_connect(tcp, tls_flag, &server, context, ssl_client) == -1)
+				if (srv_connect(tcp, tls_flag, &server, &context, &ssl_client) == -1)
 								exit(RUNTIME_ERROR);
 				
     if (DEBUG_PRINT) fprintf(stderr, "Parent Process PID: %i\n", getpid());
@@ -78,7 +78,7 @@ int main(int argc, char **argv) {
         out.ssl_client = NULL;
         // loop read
         if (DEBUG_PRINT) fprintf(stderr, "SRV->DEV STARTING\n");
-        process_output(&in, &out, 0);
+        process_output(&in, &out);
         if (DEBUG_PRINT) fprintf(stderr, "SRV->DEV FINISHED\n");
         // cleanup
         close(server);
@@ -104,7 +104,7 @@ int main(int argc, char **argv) {
         do_write(&out, "ID=304965058\n", 13);
         if (DEBUG_PRINT) fprintf(stderr, "ID=%s\n", tcp.id);
         // loop read
-        process_output(&in, &out, device_pid);
+        process_output(&in, &out);
         if (DEBUG_PRINT) fprintf(stderr, "DEV->SRV FINISHING\n");
         // cleanup
         close(server);
