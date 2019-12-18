@@ -1,4 +1,4 @@
-This is a collection of assignments created as a part of CS111 with Paul Eggert in fall 2019.
+This is a collection of assignments created for CS111 with Dr. Paul Eggert in fall 2019.
 
 Lab2 seems to be untestable on my computer; I suspect multithreading is restricted.
 As such there may be small errors, and *.csv's may be in a invalid state.
