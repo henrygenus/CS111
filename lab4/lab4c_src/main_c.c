@@ -120,10 +120,8 @@ int main(int argc, char **argv) {
     }
 
     // close tls (if one was used)
-    if (tls_flag) {
-        SSL_shutdown(ssl_client);
-        SSL_free(ssl_client);
-    }
+    if (tls_flag)
+								if (close_ssl(ssl_client) == -1) return RUNTIME_ERROR;
     
     exit(ret);
 }

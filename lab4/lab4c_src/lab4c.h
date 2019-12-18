@@ -38,15 +38,14 @@ typedef struct tcp_data {
 // swap parent and child read pipes st p_read <—> c_write & vice versa
 extern void exchange_pipes(int parent_pipe[2], int child_pipe[2]);
 int srv_connect(tcp tcp, bool tls_flag, int *server, SSL_CTX *context, SSL *client);
+int close_ssl(SSL *ssl_client);
 // processses command line arguments
 extern int process_command_line(int argc, char **argv, tcp *tcp, char **args);
 // checks options initialized by command line (pipes initialized here)
 extern int check_options(tcp *tcp);
 // loop to get input from infd and write to outfd
 void process_output(port *from, port *to, int device_flag);
-// read or tls read depending on port type
-extern int do_read(port *port, char *string, int size);
-// write or tls write depending on port type
+// write or tls write depending on port type (used for initial write)
 extern int do_write(port *port, char *string, int size);
 
 #endif /* lab4c_tcp_h */

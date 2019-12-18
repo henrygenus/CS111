@@ -29,6 +29,9 @@ SSL_CTX *ssl_init(void);
 SSL *attach_ssl_to_socket(int socket, SSL_CTX *context);
 // check condition for stopping output reading (varies if server vs device)
 inline bool last_entry(pid_t device, char *buffer);
+// read or tls read depending on port type
+inline int do_read(port *port, char *string, int size);
+
 
 // ////////////////////////////////////////////////////////////////////////
 // ////////////////////// FUNCTION IMPLEMENTATIONS ////////////////////////
@@ -96,7 +99,8 @@ int check_options(tcp *tcp) {
     else if (tcp->logfile == NULL || strlen(tcp->logfile) <= 0)
 								fprintf(stderr, "Bad logfile name\n");
     else if(tcp->portno <= 0) fprintf(stderr, "Bad port numbern\n");
-				return 0;
+				else return 0;
+				return -1;
 }
 
 // ////////////////////////////////////////////////////////////////////////
@@ -153,6 +157,14 @@ SSL *attach_ssl_to_socket(int socket, SSL_CTX *context) {
 				SSL_set_fd(sslClient, socket);
 				SSL_connect(sslClient);
 				return sslClient;
+}
+
+int close_ssl(SSL *ssl_client) {
+				int ret;
+				while((ret = SSL_shutdown(ssl_client)) == 2);
+				if (ret == -1) return SYS_ERROR;
+				SSL_free(ssl_client);
+				return 0;
 }
 
 // ////////////////////////////////////////////////////////////////////////
