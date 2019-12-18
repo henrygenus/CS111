@@ -35,6 +35,7 @@ lab2b_3.png:    successful iterations vs. threads for each synchronization metho
 lab2b_4.png:    throughput vs. thread count for mutex synchronized partitioned lists
 lab2b_5.png:    throughput vs. thread count for spin-lock-synchronized partitioned
                 lists
+*NOTE: due to inability to test on local MacOS, csv's may be in an invalid state
 
 
 QUESTION 2.3.1 - CPU time in the basic list implementation:
