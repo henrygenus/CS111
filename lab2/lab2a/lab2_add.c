@@ -21,7 +21,6 @@ int main(int argc, char** argv) {
   char test[MAX_TEST_LENGTH] = "add", lock_type[6] = "-none";
   struct timespec* start_time = &(struct timespec){0,0};
   struct timespec* end_time = &(struct timespec){0,0};
-  struct add_info structure;
   long long counter = 0; long time;
   pthread_t *threads; 
   pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER; 
@@ -30,11 +29,11 @@ int main(int argc, char** argv) {
   // get thread and iteration number
   while(1) {
     if ((opt = getopt_long(argc, argv, "", longopts, &longindex)) == -1) break;
-
+    /*
     // optional: print commands while executing
     for (ctr = 0; ctr < argc; ctr++) fprintf(stderr, "%s ", argv[ctr]);
     fprintf(stderr, "\n");
-  
+    */
     switch(opt) {
     case THREADS:
       nthreads = (optarg == NULL ? 1 : string_to_int(optarg));
@@ -65,18 +64,16 @@ int main(int argc, char** argv) {
   // get test string and lock ready
   if (opt_yield) strcat(test, "-yield");
   strcat(test, lock_type);
-
-  fprintf(stderr, "PRE");
   
   //get pre-action time
   if(clock_gettime(CLOCK_REALTIME, start_time) == -1) exit(SYS_ERROR);
 
   //create threads
   if (!(threads = (pthread_t*)malloc(nthreads*sizeof(pthread_t)))) exit(SYS_ERROR);
-  for(ctr=0; ctr < nthreads; ctr++) {
-    structure = (struct add_info){&counter, niterations, lock_type[1], lock_union};
-    if (pthread_create(&threads[ctr], NULL, thread_action, &structure)) exit(SYS_ERROR);
-  }
+  for(ctr=0; ctr < nthreads; ctr++) 
+    if (pthread_create(&threads[ctr], NULL, thread_action,
+		       &((struct add_info){&counter, niterations, lock_type[1], lock_union})))
+      exit(SYS_ERROR);
   
   // collect threads
   for(ctr=0; ctr < nthreads; ctr++) 

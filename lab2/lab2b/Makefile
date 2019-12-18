@@ -17,7 +17,7 @@ graphs: tests
 dist: output
 	tar -czf lab2b-304965058.tar.gz README Makefile lab2_list.c \
 	    SortedList.c SortedList.h lab2.h run_tests	\
-	    lab2b_1.png lab2b_2.png lab2b_3.png lab2b_4.png lab2b_5.png \
+#	    lab2b_1.png lab2b_2.png lab2b_3.png lab2b_4.png lab2b_5.png \
 	    lab2b_list.gp lab2b_list.csv profile.out 
 
 tarball:

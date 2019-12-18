@@ -33,11 +33,11 @@ int main(int argc, char** argv) {
   char **keys; pthread_t *threads; SortedListElement_t **elements; struct list_info *info;
 
   // optional: print commands while executing
-  /*  
+    
   for (ctr = 0; ctr < argc; ctr++)
     fprintf(stderr, "%s ", argv[ctr]);
   fprintf(stderr, "\n");
-  */
+  
 
   // get thread and iteration number
   while(1) {

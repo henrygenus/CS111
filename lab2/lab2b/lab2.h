@@ -2,6 +2,7 @@
 #define LAB2_H
 
 #include "SortedList.h"
+#include <unistd.h>
 #include <stdio.h> //fprintf
 #include <ctype.h> //isdigit
 #include <errno.h>
@@ -43,7 +44,7 @@ static struct option longopts[] = {
 
 // handler for child thread seg faults
 void handler(int sig) {
-  write(STDERR_FILENO, "ERROR: Segmentation Fault.", 28);
+  write(2, "ERROR: Segmentation Fault.", 28);
   _exit(sig == 2 ? sig : 2);
 }
 

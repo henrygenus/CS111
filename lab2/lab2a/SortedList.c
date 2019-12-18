@@ -24,8 +24,7 @@ void SortedList_insert(SortedList_t *list, SortedListElement_t *element) {
   SortedList_t *ptr = list;
   if (! is_valid_list(list) || element == NULL || element->key == NULL) return; 
   do { 
-  if (opt_yield & INSERT_YIELD)
-    sched_yield();
+  if (opt_yield & INSERT_YIELD) sched_yield();
     if (! is_valid_node(ptr->next)) return; 
     else ptr = ptr->next;
   } while (ptr != list && strcmp(ptr->key, element->key) < 0);
@@ -33,8 +32,7 @@ void SortedList_insert(SortedList_t *list, SortedListElement_t *element) {
 }
 
 int SortedList_delete(SortedListElement_t *element) {
-  if (opt_yield & DELETE_YIELD)
-    sched_yield();
+  if (opt_yield & DELETE_YIELD) sched_yield();
   if (! is_valid_node(element)) return 1;
   else point_at(element->prev, element->next);
   return 0;
@@ -44,8 +42,7 @@ SortedListElement_t *SortedList_lookup(SortedList_t *list, const char *key) {
   SortedList_t *ptr = list;
   if (! is_valid_list(ptr)) return NULL;
   do {
-    if (opt_yield & LOOKUP_YIELD)
-      sched_yield();
+    if (opt_yield & LOOKUP_YIELD) sched_yield();
     if (! is_valid_node(ptr->next)) return NULL;
     else ptr = ptr->next;
   } while (ptr != list && strcmp(key, ptr->key) != 0);
@@ -57,10 +54,9 @@ int SortedList_length(SortedList_t *list) {
   int length;
   if (! is_valid_node(ptr)) return -1; 
   for (length = 0; ptr != list; length++) {
-    if (opt_yield & LOOKUP_YIELD)
-      sched_yield();
+    if (opt_yield & LOOKUP_YIELD) sched_yield();
     if (! is_valid_node(ptr->next)) return -1; 
-      else ptr = ptr->next;
+    else ptr = ptr->next;
   }
   return length;
 }
