@@ -2,19 +2,27 @@ NAME: Henry Genus
 ID: 304965058
 EMAIL: hgenus@g.ucla.edu
 
+Per the spec:
+    "In this project we will create applications that run in an embedded system, read 
+    data from external sensors, and log the results. We will extend your embedded 
+    temperature sensor to accept commands from, and send reports back to, a network 
+    server. You will do this over both unencrypted and encrypted channels."
+
+constants.h:	declarations of various constants to be shared with lab4 files
+
+4b_src/	    	the source code and documentation for the embedded system
+
 main_b.c:	the main function looping between polling for commands and outputting 
 		temperatures read by the BeagleBone
 debug.h:	dummy declarations of mraa functions and constants used for debugging
 debug.c:	dummy implementations of mraa functions and constants used for debugging
 lab4b.c:        declarations of functions used by the main function
 lab4b.c:	implementations of functions used by the main function
-constants.h:	declarations of various constants to be shared with lab4c files
+
+4c_src/		the code for moderating interaction between device and server
 main_c.c:	the main function that splits the process in 3 to mediate communication
 		between the main_b device and the server
 lab4c.h:	declarations of functions to be used by the above main function
 lab4c.c:	implementations of functions to be used by the above main function
 
-
-
-** NOTE: per the spec, this code ASSUMES that the last command passed to the executable is "RUN\n"
-
+4a is included, but only exists to document setup of the BeagleBone
