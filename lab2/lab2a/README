@@ -16,7 +16,7 @@ add_script:		bash script to run various tests on the add executable
 list_script:		bash script to run various tests on the list executable
 *.csv:			output of executables as comma separated values
 *.gp:			script to create graphs from csv files resulting from tests
-
+*NOTE: due to inability to test on local MacOS, csv's may be in an invalid state
 
 
 Updates to a shared variable:
