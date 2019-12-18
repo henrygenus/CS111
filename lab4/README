@@ -10,6 +10,7 @@ Per the spec:
 
 constants.h:	declarations of various constants to be shared with lab4 files
 
+specB:	    	the spec for part B (the embedded system code)
 4b_src/	    	the source code and documentation for the embedded system
 
 main_b.c:	the main function looping between polling for commands and outputting 
@@ -19,6 +20,7 @@ debug.c:	dummy implementations of mraa functions and constants used for debuggin
 lab4b.c:        declarations of functions used by the main function
 lab4b.c:	implementations of functions used by the main function
 
+specC:		the spec for part C (the moderator between device and server)
 4c_src/		the code for moderating interaction between device and server
 main_c.c:	the main function that splits the process in 3 to mediate communication
 		between the main_b device and the server
