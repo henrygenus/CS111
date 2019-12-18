@@ -1,1 +1,0 @@
-./lab2_add --iterations=40 --threads=1 --yield 
