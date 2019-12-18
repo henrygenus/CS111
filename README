@@ -3,5 +3,5 @@ This is a collection of projects created for CS111 with Dr. Paul Eggert in fall 
 Lab2 seems to be untestable on my computer; I suspect multithreading is restricted.
 As such there may be small errors, and *.csv's may be in a invalid state.
 
-As I am not sure the canonical method for handling error messages, each project uses a
-slightly different method.
+As I am not sure the canonical method for handling error messages,
+each project uses a slightly different method.
