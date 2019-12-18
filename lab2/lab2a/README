@@ -22,7 +22,6 @@ list_script:		bash script to run various tests on the list executable
 Updates to a shared variable:
 
 ANALYSIS lab2_add-1:
-
 	The non yielding tests required > 1 thread and > 100 iterations to consistently
 	fail.
 	The yielding tests required > 1 thread && > 100 iterations or just > 4 threads.	
