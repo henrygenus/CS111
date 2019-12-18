@@ -3,6 +3,21 @@ EMAIL: hgenus@g.ucla.edu
 ID: 304965058
 SLIPDAYS: 0
 
+PACKAGE CONTENTS:
+
+SortedList.h:		declarations of sorted linked list functions
+SortedList.c:		implementations of sorted linked list functions
+lab2.h:			declaration of various functions to be used by list & add
+lab2_add.c:		source code for an executable that adds and subtracts in
+			parallel to a shared variable to test for races
+lab2_list.c:		source code for an executable that adds to and deletes
+			from a shared linked list to test for race conditions
+add_script:		bash script to run various tests on the add executable
+list_script:		bash script to run various tests on the list executable
+*.csv:			output of executables as comma separated values
+*.gp:			script to create graphs from csv files resulting from tests
+
+
 
 Updates to a shared variable:
 
