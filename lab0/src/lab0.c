@@ -47,7 +47,7 @@ int main(int argc, char** argv) {
     if ((opt = getopt_long(argc, argv, "", longopts, &longindex)) == -1)
       break;
     switch(opt) {
-    case 'i':
+    case INPUT:
       if ((ifd = open(optarg, O_RDONLY)) == -1) {
 	perror(optarg);
 	if (infile != NULL) close(ifd);
@@ -57,7 +57,7 @@ int main(int argc, char** argv) {
       dup2(ifd, 0);
       infile = strdup(optarg);
       break;
-    case 'o':
+    case OUTPUT:
       if((ofd = open(optarg, O_WRONLY | O_APPEND | O_CREAT, 0600)) == -1) {
 	perror(optarg);
 	if (infile != NULL)  close(ifd);
@@ -67,13 +67,13 @@ int main(int argc, char** argv) {
       dup2(ifd, 1);
       outfile = strdup(optarg);
       break;
-    case 's':
+    case SEGFAULT:
       segFaultFlag = 1;
       break;
-    case 'c':
+    case CATCH:
       catchFlag += 1;
       break;
-    case 'd':
+    case DUMP_CORE:
       catchFlag -= 1;
       break;
     case '?':
