@@ -24,7 +24,7 @@ Updates to a shared variable:
 
 ANALYSIS lab2_add-1:
 	Non-yielding tests required > 1 thread & > 100 iterations to consistently fail.
-	Yielding tests required > 1 thread && > 100 iterations or just > 4 threads.	
+	Yielding tests required > 1 thread && > 100 iterations or just > 4 threads.
 	Failures were therefore much easier with yielding.
 
 QUESTION 2.1.1 -causing conflicts
