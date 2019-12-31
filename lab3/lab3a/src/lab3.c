@@ -5,17 +5,17 @@
 #include <time.h>       /* for tm, getime() */
 #include "lab3.h"
 
-inline int print_error_msg(char *error_msg) {
+int print_error_msg(char *error_msg) {
     if (error_msg == NULL) perror(NULL);
     else fprintf(stderr, "%s\n", error_msg);
     return 2;
 }
 
-inline __u32 resolve_address(__u32 absolute_block_id) {
+__u32 resolve_address(__u32 absolute_block_id) {
     return absolute_block_id * block_size;
 }
 
-inline __u8 is_used(int block_num, __u8 *bitmap) {
+__u8 is_used(int block_num, __u8 *bitmap) {
     int index = 0, offset = 0;
         if (block_num == 0)
             return 1;
@@ -24,13 +24,13 @@ inline __u8 is_used(int block_num, __u8 *bitmap) {
     return (bitmap[index] & (1 << offset));
 }
 
-inline void print_super(struct ext2_super_block *super) {
+void print_super(struct ext2_super_block *super) {
     fprintf(stdout, "SUPERBLOCK,%u,%u,%i,%hu,%u,%u,%u\n", super->s_blocks_count,
             super->s_inodes_count, block_size, super->s_inode_size,
             super->s_blocks_per_group, super->s_inodes_per_group, super->s_first_ino);
 }
 
-inline void print_group(struct ext2_group_desc *group, __u32 group_num,  __u32
+void print_group(struct ext2_group_desc *group, __u32 group_num,  __u32
                         blocks_in_group, __u32 inodes_in_group) {
     fprintf(stdout, "GROUP,%u,%u,%u,%u,%u,%u,%u,%u\n", group_num, blocks_in_group,
             inodes_in_group, group->bg_free_blocks_count, group->bg_free_inodes_count,

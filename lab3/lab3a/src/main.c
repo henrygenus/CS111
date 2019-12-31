@@ -85,7 +85,8 @@ int main(int argc, const char * argv[]) {
             }
             else {
                 // get inode
-                address = resolve_address(group.bg_inode_table) + sizeof(inode)*(ctr-1);
+                address = 
+                    resolve_address(group.bg_inode_table)+ sizeof(inode)*(ctr-1);
                 if (pread(fd, &inode, sizeof(inode), address) == -1) exit(SYS_ERROR);
                 if (inode.i_mode == 0 || inode.i_links_count == 0) continue;
                 print_inode(&inode, ctr);
