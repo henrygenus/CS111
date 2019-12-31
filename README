@@ -1,7 +1,8 @@
-This is a collection of projects created for CS111 with Dr. Paul Eggert in fall 2019.
-
 Lab2 seems to be untestable on my computer; I suspect multithreading is restricted.
 As such there may be small errors, and .csv files & graphs may be in a invalid state.
 
 As I am not sure the canonical method for handling error messages, as such each project
 uses a slightly different method.
+
+lecture_notes contains typed up and improved notes from all lectures, but not broken
+up by lecture.
