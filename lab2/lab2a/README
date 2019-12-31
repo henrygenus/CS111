@@ -163,7 +163,3 @@ ANSWER 2.2.2:
 	Beyond four threads, however, we start to see a pattern much like the list--the
 	spin lock continues to spin and eat processor time while the mutex lock sleeps,
 	and therefore the spin lock shoots up in time cost.
-	
-
-
-BB
