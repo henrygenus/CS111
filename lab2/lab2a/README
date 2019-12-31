@@ -129,9 +129,8 @@ ANSWER 2.2.1:
 	While the mutex lock cost per operation increased as the threads increased in
 	the addition case, it stayed constant in the list.
 	The cost of the addition increased with increasing threads because more threads
-	are vying for access to the processor, so while the number of additions per
-	thread is the same, the OS must do more context switches, and there is more
-	spinning.
+	are vying for access to the processor, so the number of additions per thread is
+	the same, but the OS must do more context switches, so there is more spinning.
 	The list case stays linear because the threads still acquire and release the
 	lockonce per node, and therefore perform the same number of operations and
 	context switches.
@@ -147,8 +146,7 @@ QUESTION 2.2.2 - scalability of spin locks
 ANSWER 2.2.2:
 	With a small number of threads ( <= 4 ) we find that the mutex and spin lock
 	behave identically; both locks take a constant time per operation.  
-	Beyond four, however, the spin lock shoots up linearly while the mutex stays
-	constant.  
+	Beyond four, the spin lock shoots up linearly while the mutex stays constant.  
 	The mutex lock is clearly the better choice for lists.
 	The explanation is simple: a mutex lock behaves like a spin lock initially, but
 	transitions to sleep later; it would seem that through four threads, the
@@ -168,3 +166,4 @@ ANSWER 2.2.2:
 	
 
 
+BB
