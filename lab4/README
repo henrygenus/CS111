@@ -27,4 +27,5 @@ main_c.c:	the main function that splits the process in 3 to mediate communicatio
 lab4c.h:	declarations of functions to be used by the above main function
 lab4c.c:	implementations of functions to be used by the above main function
 
-4a is included, but only exists to document setup of the BeagleBone
+4a is included, but only exists to document setup of the BeagleBone.
+It is currently missing an ifconfig result screenshot.
