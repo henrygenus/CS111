@@ -1,4 +1,4 @@
-This is a collection of projects and notes from CS111 with Dr. Paul Eggert in fall 2019.
+This is a collection of projects and notes from CS111:"Operating Systems Principles" with Dr. Paul Eggert in fall 2019.
 
 Lab2 seems to be untestable on my computer; I suspect multithreading is restricted.
 As such there may be small errors, and .csv files & graphs may be in a invalid state.
