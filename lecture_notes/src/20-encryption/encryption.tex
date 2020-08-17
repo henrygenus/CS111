@@ -1,0 +1,141 @@
+\documentclass[../../lecture_notes.tex]{subfiles}
+\begin{document}
+
+
+When we send data over an untrusted network, we need to encrypt the data! We do this according to \term{Kerchoff’s Design Principal} $\coloneqq$ minimize what needs to be kept secret.
+
+\begin{center}
+\begin{tikzpicture}
+\node[rectangle, minimum width=4cm, minimum height=3cm, align=center, draw] (PL) {Program\\(public)};
+\node[right=of PL, circle, minimum size=0.25cm, draw] (C) {};
+\node[right=of C, rectangle,minimum width=4cm, minimum height=3cm, align=center, draw] (PR) {Program\\(public)};
+\draw (PL.east) to [bend right] (C); \draw (PR.west) to [bend left] (C); 
+\node[below right=-0.525cm and -1.025cm of PL, rectangle, minimum width=1cm, minimum height=0.5cm, draw] {KEY};
+\node[below left=-0.525cm and -1.025cm of PR, rectangle, minimum width=1cm, minimum height=0.5cm, draw] {KEY};
+\end{tikzpicture}
+\end{center}
+
+
+The question of security is a question of trust. Most programs run by the OS are not trusted (cat, grep, sh, gcc, make…) but a few are (login, sudo, su…), and can therefore call setuid()
+
+If we are worried about security, the latter are the risk: how do we choose who to trust?
+
+\begin{minipage}{0.4\linewidth}
+\centering
+\begin{tikzpicture}
+\node[rectangle, minimum height=2cm, align=left, draw] (L) {sudo\\login\\kernel\\hw};
+\node[right=0cm of L, rectangle, minimum height=2cm, minimum width=4cm, align=center, draw] (L) {everything\\else};
+\end{tikzpicture}
+\end{minipage}%
+\begin{minipage}{0.6\linewidth}
+We call the set of all trusted programs the \term{trusted computing base}. We seek to minimize this.
+\end{minipage}
+
+BUT can we really trust anything? Take Ken Thompson, creator of Unix. He once wrote a Turing Award winning paper called "Reflections on Trusting Trust". The paper described a bug he built into Unix.
+\begin{lstlisting}
+// in the login program, Ken added the following code
+if(strcmp(user,"ken")==0) uid = 0;
+// however, this would be easily found out, so in gcc, he adds:
+if(compiling(login.c)) generate strcmp
+// now no one looking at the login source code can see the bug
+// he also adds in gcc
+if(compiling(gcc.c)) generate generate strcmp
+// he compiles gcc and edits the code back -- the code is now gone!
+\end{lstlisting}
+
+Couldn’t this be found in the assembly? NO:
+\begin{itemize}
+	\item he can modify the code for objdmp
+	\item he can even make it so that using other code injects bugs!
+\end{itemize}
+
+The moral of the story is, “You need to trust your tools” (as an aside, it also shows gcc really should be in the TCB).
+
+With this principal in mind, we model secure message passing:
+\[ A \to B {\text{“I’m Alice”}}^K \]
+
+This is BAD; it is subject to replay attacks. Thus we need a \term{nonce} $\coloneqq$ a nonsense string used to verify possession of a key:
+\begin{align*}
+	A &\to B \text{ “I’m Alice”} \\
+	B &\to A \text{ “<nonce>”} \\
+	A &\to B \text{ \{“<nonce>”\}} \\
+	B &\to A \text{ “OK”}
+\end{align*}
+
+We can now effectively verify identify, so how do we use this to send messages?
+\begin{itemize}
+\item we use a Hashed Message Authentication Code
+\end{itemize}
+
+\[ A → B M \parallel \mathrm{HMAC}(M, K) \]
+how do we find an HMAC?
+We call our cryptographic friends for a \term{(Cryptographically) Secure Checksum Algorithm}, defined st if $SHA(M) = N$, it is hard to find $M’ \mathrm{st} SHA(M’) = N$. We then let HMAC(M, K) = f(SHA(K||M))
+
+Now we are 100\% secure, right?
+\begin{itemize}
+\item Of course not: SHA’s can be broken — we are already on SHA 2.something
+\end{itemize}
+
+
+Distributed security can also be done with a virtual network inside of one Computer:
+
+Typical authentication via ssh is multiphase :
+\begin{enumerate}[nosep]
+\item establish connection with public/private key encryption
+\item use the encrypted nonce as a shared secret key
+\end{enumerate}
+
+Shared secrets are the model we used above; the public/private model is as such:
+\begin{enumerate}[nosep]
+\item a message $A \to B$ is encrypted with B’s public key
+\item person A can then decrypt the message with their private key
+\end{enumerate}
+
+So it is better to use this first, since it is slower but more secure. note: verifying a public key is not 100\% exact.
+
+This model is utilized by the \term{RSA encryption algorithm}
+\begin{itemize}
+	\item The keys for the RSA algorithm are generated in the following way:
+		\begin{enumerate}[nosep]
+			\item Choose two distinct prime numbers $p$ and $q$.
+				\begin{itemize}
+					\item $p$ \& $q$ should be chosen at random
+					\item $p$ \& $q$ should be similar in magnitude but differ in length by a few digits 
+					\item $p$ and $q$ are kept secret
+				\end{itemize}
+			\item Compute $n = pq$.
+				\begin{itemize}
+					\item $n$ is used as the modulus for both keys
+					\item the length of n expressed in bits, is the key length
+				\end{itemize}
+			\item Compute $\Phi(n) = (p - 1) (q - 1)$
+			\item Choose an integer e such that $1 < e <\Phi(n)$ and $e$ and $\Phi(n)$ share no factors besides 0.
+				\begin{itemize}
+					\item an $e$ with a short bit-length results in more efficiency
+					\item the most commonly chosen value for $e$ is $216 + 1 = 65,537$
+					\item the smallest (and fastest) possible value for $e$ is 3
+				\end{itemize}
+			\item Determine $d \equiv e^{-1}\mod\Phi(n)$
+		\end{enumerate}
+	\item The \term{public key} consists of the modulus $n$ and the public (or encryption) exponent $e$.
+	\item The \term{private key} consists of the private (or decryption) exponent $d$.
+		\begin{itemize}
+			\item $p$, $q$, and $\lambda(n)$ must also be kept secret because they can be used to calculate $d$. 	
+			\item They can all be discarded after $d$ has been computed.
+		\end{itemize}
+\end{itemize}
+For example:
+\begin{enumerate}
+\item[]
+	Suppose $P = 53$ and $Q = 59$. \\
+	Then $n = PQ = 3127$. \\
+	Let $e = 3$. \\
+	Then,  $\Phi(n) = 3016$. \\
+	For $k = 2$, value of $d$ is $2011$. \\
+	We need to calculate $\Phi(n)$ such that $\Phi(n) = (P-1)(Q-1)$. \\
+	Then $d = (k*\Phi(n) + 1) / e$ for some integer $k$. \\
+	Thus for $k$ = 2, value of $d$ is $2011$.
+\end{enumerate}
+
+
+\end{document}

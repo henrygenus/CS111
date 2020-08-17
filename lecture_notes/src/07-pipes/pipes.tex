@@ -1,0 +1,112 @@
+\documentclass[../../lecture_notes.tex]{subfiles}
+\begin{document}
+
+
+Pipes have two main benefits:
+\begin{itemize}
+\item they control same inter-process communication
+\item they are transparent (the program doesn’t know they exist
+\end{itemize}
+
+How are they implemented?
+\begin{lstlisting}
+int pipe(int pipefd[2]);
+pipefd[0] = "read"
+pipefd[1] = "write"
+// these can be thought of like 0 = stdin and 1 = stdout
+\end{lstlisting}
+
+This builds a circular bounded buffer that can be used to communicate between processes
+BUT that introduces the case of a full buffer; what do we do?
+\begin{itemize}
+\item write what you can and return the size
+\item wait
+\item throw error
+\end{itemize}
+
+Pipes therefore have a third benefit—flow control!
+\begin{lstlisting}[language=sh]
+$ du | sort -n
+\end{lstlisting}
+
+How do we use pipes?
+\begin{lstlisting}
+int pipefd[2];
+pid_t cpid;
+char buf;
+if (argc != 2) exit(EXIT_FAILURE);
+if (pipe(pipefd) == -1) {perror("pipe"); exit(1);}
+if ((cpuid = fork()) == 0) {
+	close(pipefd[1];
+	while(read(pipefd[0], &buf, 1) > 0) write(STDOUT_FILENO, &buf, 1);
+	write(STDOUT_FILENO, "\n", 1);
+	close(pipefd[0];
+	_exit(0);
+}
+else { // parent
+	close(pipefd[0]);
+	write(pipefd[1], argv[1], strlen(argv[1]));
+	close(pipefd[1]);
+	wait(NULL);
+	exit(0);
+}
+// note: the order of execution is not guaranteed 
+\end{lstlisting}
+
+
+Pipes, as mentioned above, are not perfect; we have 4 major categories of pipe failure:
+\begin{enumerate}
+\item Reading from an empty pipe where the writer never writes $\implies$ hang indefinitely
+\item Reading from an empty pipe with no writers $\implies$ return 0
+\item Writing to a full pipe where the reader never reads $\implies$ suspend/hang indefinitely
+\item Writing to a full pipe where the reader never reads \begin{itemize}
+	\item SIGPIPE since returning 0 would probably cause many people to retry
+	\item if SIGPIPE is ignored, write fails with ESPIPE
+	\end{itemize}
+\end{enumerate}
+Note that the big mistakes and performance errors occur when we do not close pipes. For example, a named pipe can cause an fd leak, since it could be referenced by any program
+
+A common issue:
+\begin{lstlisting}
+while (condition) printf("%d\n", number);
+// since this would run forever on write failure, 
+// we have an asynchronous signal SIGPIPE 
+// which kills a program if no readers remain
+\end{lstlisting}
+
+BUT sometimes there is a reader, who's not listening (plus closing has a delay).
+Take the setup:
+
+\begin{center}
+\begin{tikzpicture}
+\node[rectangle, minimum width=2.5cm, draw] (L1) {Work Station};
+\node[rectangle, minimum width=2.5cm, below=0cm of L1, draw] (L2) {Emacs};
+\node[right=of L1, minimum width=2.5cm, draw, align=center] (C1) {Uninterrupted\\Power Supply};
+\node[below=0cm of C1, minimum width=2.5cm, draw] (C2) {Battery};
+\node[right=of C1, minimum width=2.5cm, draw] (R1) {House};
+\draw[-Latex] (L1.north east) -- (C1.north west); 
+\draw[-Latex] (L2.north east) -- (C2.north west); 
+\draw[-Latex] (C1.north east) -- (R1.west);
+\end{tikzpicture}
+\end{center}
+
+
+What do we do if the power in the house goes out?
+\begin{enumerate}[nosep]
+\item do nothing and lose work
+\item OS saves a stack of running processes and state in the stack
+\item End-to-End (processes are notified and can figure it out for themselves)
+\end{enumerate}
+
+Since \#2 can make clock-based apps go haywire, we consider \#3; we have 3 ways of notifying processes that we have lost power
+\begin{enumerate}
+\item poll /dev/power \\
+	this is annoying, since the burden is on the programmer
+\item /dev/powering\_off \\
+	the kernel blocks this unless we have lost power (too complicated)
+\item SIGNALS \\
+	grab the attention of a program not designed to receive it
+\end{enumerate}
+
+
+\end{document}

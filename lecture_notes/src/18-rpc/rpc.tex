@@ -1,0 +1,230 @@
+\documentclass[../../lecture_notes.tex]{subfiles}
+\begin{document}
+
+
+We start by observing a virtual usage of the client/server approach
+
+\subsection*{X PROTOCOL}
+
+\begin{center}
+\begin{tikzpicture}
+\node (L1) {Process};
+\node[right=of L1, rectangle, minimum width=3.5cm, minimum height=2cm, draw] (O1) {emacs: draw()};
+\node[below=0cm of O1, rectangle, minimum width=3.5cm, draw] (O2) {Construct message};
+\node[left=of O2] {Kernel};
+\node[right=of O1, rectangle, minimum width=3.5cm, minimum height=2cm, draw] (I1) {outb()};
+\node[below=0cm of I1, rectangle, minimum width=3.5cm, draw] (I2) {Deode message};
+\node[right=of I1, rectangle, minimum width=3.5cm, minimum height=1cm, draw] (R) {DISPLAY};
+\draw[-Latex] (O2) -- (I2); \draw[-Latex] (I1) -- (R);
+\end{tikzpicture}
+\end{center}
+
+
+The X server handles the keyboard, mouse, and display of the system
+
+This is an example of a \term{distributed system} in which the server effectively acts as the system kernel. and uses \term{remote procedure calls}. Our goal in these systems is modularity rather than virtualization. 
+
+This has a few distinction from standard procedure calls
+\begin{enumerate}[nosep]
+\item the caller and callee do not need to share an address space
+\item passing by reference and pointers are not allowed
+\item the client and server need not be on the same architecture (i.e. x86 vs x86-64 or x86-64 vs SPARC64)
+\end{enumerate}
+
+
+But the last of these distinctions introduces long size and endian-ness problems. We address these by \term{marshaling} commands. This adds a layer of abstraction on the commands. 
+
+Messages can be passed in multiple bit pattern forms such as XML (slow), JSON, and IEE 754. One such usage is HTTP:
+\begin{center}
+\begin{tikzpicture}
+\node (CL) {Client};
+\node[above right=0cm and 1cm of CL, align=left] (GET) {Get/HTTP/1.0\\| data};
+\node[below right=0cm and 1cm of CL, align=left] (PUT) {HTTP/1.1 200 ok\\| data response};
+\node[below right=0cm and 1cm of GET] (SRV) {Server};
+\draw[-Latex] (GET.east) -- +(1,0); \draw[-Latex] (PUT.west) -- +(-1,0);
+\end{tikzpicture}
+\end{center}
+
+
+What could go wrong?
+\begin{itemize}
+\item messages can get lost/duplicated/corrupted
+\item the network/server can go down (or be slow)
+\end{itemize}
+\& these appear identical to the client!
+
+
+We deal with these issues as two categories:
+\begin{enumerate}
+\item Corruption
+	\begin{enumerate}
+		\item better checksums in messages
+		\item end-to-end (rather than link) encryption
+		\begin{itemize}
+			\item \term{link encryption} $\coloneqq$ devices decrypt and re-encrypt
+			\item \term{end-to-end encryption} $\coloneqq$ data stays encrypted for the entire journey
+		\end{itemize}
+		\item resend messages on detection 
+	\end{enumerate}
+\item Network Issues
+	\begin{enumerate}
+		\item At-Least-Once RPC (keep trying) --- good for idempotent information
+		\item At-Most-Once RPC (log on error) --- good for transactions
+		\item Exactly-Once RPC (don’t make mistakes) --- very (some would say too) difficult to implement
+	\end{enumerate}
+\end{enumerate}
+
+Another downside is INEFFICIENCY. We have 3 major approaches to combatting this:
+
+\begin{minipage}{0.4\linewidth}
+\begin{tikzpicture}
+\node[minimum width=2.25cm] (S) {Synchronous}; \node[below=5cm of S, minimum width=2.25cm] (T) {};
+\draw[-Latex] (S.south west) -- node[pos=0.1] (L1) {} node[pos=0.5] (L2) {} node[pos=0.9] (L3) {} (T.north west);
+\draw[-Latex] (S.south east) -- node[pos=0.3] (R1) {} node[pos=0.7] (R2) {} (T.north east);
+\draw[-Latex] (L1) -- (R1); \draw[-Latex] (R1) -- (L2); \draw[-Latex] (L2) -- (R2); \draw[-Latex] (R2) -- (L3);
+
+\node[minimum width=2.25cm, right=of S] (A) {Asynchronous}; 
+\node[below=5cm of A, minimum width=2.25cm] (B) {};
+\draw[-Latex] (A.south west) -- 
+	node[pos=0.04] (L1) {} node[pos=0.08] (L2) {} node[pos=0.12] (L3) {} 
+	node[pos=0.56] (L4) {} node[pos=0.60] (L5) {} node[pos=0.64] (L6) {} 
+	(B.north west);
+\draw[-Latex] (A.south east) -- 
+	node[pos=0.24] (R1) {} node[pos=0.28] (R2) {} node[pos=0.32] (R3) {} 
+	node[pos=0.36] (R4) {} node[pos=0.40] (R5) {} node[pos=0.44] (R6) {} 
+	(B.north east);
+\draw[-Latex] (L1) -- (R1); \draw[-Latex] (L2) -- (R2); \draw[-Latex] (L3) -- (R3);
+\draw[-Latex] (R4) -- (L4); \draw[-Latex] (R5) -- (L5); \draw[-Latex] (R6) -- (L6);
+\end{tikzpicture}
+\end{minipage}%
+\begin{minipage}{0.6\linewidth}
+\begin{enumerate}
+\item Asynchronous System Calls (Pipelining)
+	\begin{itemize}
+		\item allows for more useful work time
+		\item complicated partial failure
+		\item out-of-order responses
+		\item requests must be independent
+	\end{itemize}
+
+\item Cache-on-the-Client
+	\begin{itemize}
+		\item cache responses to likely requests
+		\item common with web browsers
+	\end{itemize}
+
+\item Pre-Fetching
+	\begin{itemize}
+		\item guess a response prior to receiving methods
+		\item hogs resources
+	\end{itemize}
+\end{enumerate}
+\end{minipage}
+
+We can use these ideas to implement
+
+\subsection{Networked File Systems}
+
+We analyze \term{NFS models} $\coloneqq$ a Linux-type system which sends requests (like open, read, lseek…) to a network.
+Two commonly used versions are \begin{enumerate}[nosep]
+\item[v3:] useful in machine rooms, since it uses \term{UDP} 
+	$\coloneqq$ establishes a connection before sending packets
+\item[v4:] useful for the internet, since it uses \term{TCP} 
+	$\coloneqq$ sends packets without establishing a connection
+\end{enumerate}
+
+
+\begin{figure}[h!]
+	\flushright
+	\resizebox{.8\textwidth}{!}{
+	\begin{tikzpicture}
+	\node [rectangle, minimum width=4cm, minimum height=3cm, draw] (C) {\huge CLIENT};
+	\node [below=0cm of C, minimum width=4cm, minimum height=1cm, draw] (CK) {Kernel (VFS)};
+	\node [below=0cm of CK, semicircle, minimum size=1.8cm, anchor=south, rotate=180, draw, 
+		label=center:{TCP/UCP}] (LUCP) {};
+	\node [right=4cm of C, rectangle, minimum width=4cm, minimum height=3cm, draw] (S) {\huge SERVER};
+	\node [below=0cm of S, minimum width=4cm, minimum height=1cm, align=center, draw] (SK) 
+		{Kernel\\(VFS Daemon)};
+	\node [below=0cm of SK, semicircle, minimum size=1.8cm, anchor=south, rotate=180, draw, 
+		label=center:{TCP/UCP}] (RUCP) {};
+	\draw [Latex-Latex] (LUCP.north) -- node[pos=0.5, align=center, above, use as bounding box] 
+		{\scriptsize High Throughput, Low Latency} (RUCP.north);
+	\node [right=2cm of S, cylinder, minimum size=2cm, draw, rotate=90, label=center:{DISK}] (DISK) {};
+	\draw ([yshift=-0.6cm] S.north east) -- (DISK);
+	\end{tikzpicture}
+	}
+
+	\vspace{1cm}
+\end{figure}
+
+
+The kernel uses a VFS (such as btts, ext4, etc) to
+\begin{itemize}
+\item transparently marshal procedure calls
+\item send and receive unencrypted packets (encryption started with VFSv4)
+\end{itemize}
+
+Basically, we emulate a local file system with a network! This is great for modularity (we don’t even need the same underlying architecture, remember?) but now we are relying on a network; what if it goes down?
+
+For example, note that read is short enough to avoid failure by interrupt; but what if the network goes down?
+\begin{itemize}
+\item Option A: read() hangs --- this exposes us to infinite hangs!
+\item Option B: send a \^{}C to interrupt --- apps which assume a return from read get complicated!
+\end{itemize}
+The system administrator has to choose, but we’re wrong either way.
+
+So what do we do?
+\begin{itemize}
+\item In short, don’t let the network go down, but we design our protocol carefully just in case
+\end{itemize}
+
+Even without a crash, close() is costly, as the client waits for all outstanding requests
+
+NFS Primitives:
+\begin{lstlisting}[language = python]
+# all elements are fixed-size
+# fh and attr are concatenated and cast to integers
+MKDIR(dirfh, name, attr) -> fh & sttr
+REMOVE(dirfh, name)-> status
+READ(fh, offset, size) -> data
+LOOKUP(dirfh, name) -> fh & attr
+# example message:
+LOOKUP("/usr/local", "/bin") -> 4728 + {output of ls}
+\end{lstlisting}
+
+
+An nfs \term{file handle} uniquely identifies a file on a server
+\begin{itemize}
+\item it survives renames and reboots
+\item on Unux, it is a concatenation of device number, inode number, and serial number
+\end{itemize}
+
+They cause the server to be stateless, as they do not rely on the state of the client
+So will a concurrent WRITE and RENAME cause problems?
+\begin{itemize}
+	\item NO; the file handle does not change
+\end{itemize}
+
+Will a concurrent REMOVE and WRITE?
+\begin{itemize}
+	\item YES, which violates the Linux standard! (would wait to delete, but NFSv3 is stateless)
+\end{itemize}
+
+
+There are two cases:
+\begin{enumerate}[nosep]
+\item REMOVE \& WRITE are from the same client
+	\begin{itemize}
+		\item save a dummy request to a temp file names “.NFS\#”
+		\item the client is responsible for the cleanup
+	\end{itemize}
+\item REMOVE \& WRITE from different clients
+	\begin{itemize}
+		\item set errno = ESTALE
+	\end{itemize}
+\end{enumerate}
+
+A related error occurs with concurrent REMOVE \& WRITE or WRITE \& WRITE. With the system as we currently understand it, the NFS would not recognize the stale request and would write to the wrong file. Therefore we need a serial number to represent what version of this file handle a file is.
+
+
+\end{document}

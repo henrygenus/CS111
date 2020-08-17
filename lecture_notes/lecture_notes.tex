@@ -1,0 +1,122 @@
+\documentclass[10pt]{article}
+\usepackage[T1]{fontenc}
+\usepackage[textheight=10in]{geometry}
+\usepackage[english]{babel}
+\usepackage{subfiles}
+
+\setlength{\parindent}{0em}
+\setlength{\parskip}{1em}
+\usepackage{float, subcaption, caption, graphicx, soul}
+\graphicspath{ {img/} }
+
+\usepackage{amsthm, amssymb, amsmath, amssymb, mathtools}
+\usepackage{tikz, pgfplots, tikz-qtree}
+\pgfplotsset{compat=newest} 
+\usepgfplotslibrary{fillbetween}
+\usetikzlibrary{positioning, calc, shapes.geometric, shapes.multipart, 
+	shapes, arrows.meta, arrows, decorations.pathreplacing,
+	decorations.markings, external, trees, shadows}
+\usepackage[edges]{forest}
+\forestset{compat=newest} 
+
+\usepackage{listings}
+\lstset{basicstyle=\ttfamily,
+	showstringspaces=false,
+	commentstyle=\color{gray},
+	keywordstyle=\color{blue},
+	basicstyle=\small,
+	language=C,
+	tabsize=2
+}
+
+\makeatletter
+\tikzset{no shadows/.code=\let\tikz@preactions\pgfutil@empty}
+\makeatother
+\usepackage{enumitem}
+\usepackage{arydshln}
+\usepackage{CJKutf8}
+
+\newcommand\term[1]{\emph{#1}}
+
+
+\title{%
+	CS 111: Operating Systems\\
+	Lecture Notes}
+\author{Henry Genus}
+\date{Fall 2018}
+
+\begin{document}
+{
+\setlength{\parskip}{0em}
+\maketitle
+\newpage
+\tableofcontents
+\newpage
+}
+
+
+\section{Introduction to Systems}
+\subfile{src/01-systems/systems}
+
+\section{Bare-Metal Application}
+\subfile{src/02-bare_metal_app/bare_metal_app}
+
+\section{Modularity}
+\subfile{src/03-modularity/modularity}
+
+\section{Virtualization}
+\subfile{src/04-virtualization/virtualization}
+
+\section{Parallelism}
+\subfile{src/05-parallelism/parallelism}
+
+\section{Files}
+\subfile{src/06-files/files}
+
+\section{Pipes}
+\subfile{src/07-pipes/pipes}
+
+\section{Signals}
+\subfile{src/08-signals/signals}
+
+\section{Scheduling}
+\subfile{src/09-scheduling/scheduling}
+
+\section{Scheduling Policies}
+\subfile{src/10-scheduling_policies/policies}
+
+\section{Concurrency}
+\subfile{src/11-concurrency/concurrency}
+
+\section{Locks}
+\subfile{src/12-locks/locks}
+
+\section{File Systems}
+\subfile{src/13-file_systems/file_systems}
+
+\section{The Unix File System}
+\subfile{src/14-unix/unix}
+
+\section{Robustness}
+\subfile{src/15-robustness/robustness}
+
+\section{Virtual Memory}
+\subfile{src/16-VM/vm}
+
+\section{Memory}
+\subfile{src/17-memory/memory}
+
+\section{Remote Procedure Calls}
+\subfile{src/18-rpc/rpc}
+
+\section{Security}
+\subfile{src/19-security/security}
+
+\section{Encryption}
+\subfile{src/20-encryption/encryption}
+
+\section{Cloud Computing}
+\subfile{src/21-cloud_computing/cloud_computing}
+
+
+\end{document}
