@@ -1,0 +1,12 @@
+*.gitignore
+*.gitignore~
+*.DS_store
+.idea/
+textbook.pdf
+*.dSYM/
+**/Build/
+*.xcodeproj
+**/DerivedData/
+**/venv/
+**/__pycache__/
+**/UIController
