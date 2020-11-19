@@ -12,7 +12,6 @@ constants.h:	declarations of various constants to be shared with lab4 files
 
 specB:	    	the spec for part B (the embedded system code)
 4b_src/	    	the source code and documentation for the embedded system
-
 main_b.c:	the main function looping between polling for commands and outputting 
 		temperatures read by the BeagleBone
 debug.h:	dummy declarations of mraa functions and constants used for debugging
